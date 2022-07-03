@@ -2,7 +2,7 @@
 pragma solidity ^0.6.0;
 
 import './Level.sol';
-import 'openzeppelin/contracts-3.3.0/contracts/access/Ownable.sol';
+import 'openzeppelin/contracts-3.4.2/contracts/access/Ownable.sol';
 
 contract Ethernaut is Ownable {
 
@@ -38,13 +38,13 @@ contract Ethernaut is Ownable {
     require(registeredLevels[address(_level)]);
 
     // Get level factory to create an instance.
-    address instance = _level.createInstance.value(msg.value)(msg.sender);
+    address instance = _level.createInstance(msg.sender);
 
     // Store emitted instance relationship with player and level.
     emittedInstances[instance] = EmittedInstanceData(msg.sender, _level, false);
 
     // Retrieve created instance via logs.
-    // emit LevelInstanceCreatedLog(msg.sender, instance);
+    emit LevelInstanceCreatedLog(msg.sender, instance);
   }
 
   function submitLevelInstance(address payable _instance) public {
