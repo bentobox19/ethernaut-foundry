@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
-import "forge-std/Test.sol";
+import "forge-std/Vm.sol";
 
 interface ILevel {}
 
@@ -10,13 +10,9 @@ interface IEthernaut {
   function submitLevelInstance(address payable) external;
 }
 
-contract Utils is Test {
-  IEthernaut internal ethernaut;
-  address internal constant ETHERNAUT_ADDRESS = 0xD991431D8b033ddCb84dAD257f4821E9d5b38C33;
-
-  constructor() {
-    ethernaut = IEthernaut(ETHERNAUT_ADDRESS);
-  }
+library utils {
+  Vm public constant vm = Vm(address(bytes20(uint160(uint256(keccak256('hevm cheat code'))))));
+  IEthernaut internal constant ethernaut = IEthernaut(0xD991431D8b033ddCb84dAD257f4821E9d5b38C33);
 
   function createLevelInstance(address _levelFactory) external returns (address) {
     ILevel level = ILevel(_levelFactory);

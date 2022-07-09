@@ -31,12 +31,10 @@ contract CoinFlipAttack {
 contract CoinFlipTest is Test {
   using SafeMath for uint256;
 
-  Utils internal utils;
   address internal challengeAddress;
   CoinFlipAttack internal attackContract;
 
   function setUp() public {
-    utils = new Utils();
     challengeAddress = utils.createLevelInstance(0x4dF32584890A0026e56f7535d0f2C6486753624f);
     attackContract = new CoinFlipAttack(challengeAddress);
   }

@@ -9,12 +9,10 @@ interface IInstance {
 }
 
 contract HelloTest is Test {
-  Utils internal utils;
   address internal challengeAddress;
   IInstance internal challenge;
 
   function setUp() public {
-    utils = new Utils();
     challengeAddress = utils.createLevelInstance(0x4E73b858fD5D7A5fc1c3455061dE52a53F35d966);
     challenge = IInstance(challengeAddress);
   }
