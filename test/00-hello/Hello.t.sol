@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "forge-std/Test.sol";
-import "../Utils.sol";
+import "../utils.sol";
 
 interface IInstance {
   function authenticate(string memory passkey) external;
