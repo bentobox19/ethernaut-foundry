@@ -1,21 +1,6 @@
 {
   "levels": [
     {
-      "name": "Force",
-      "created": "2017-11-01",
-      "difficulty": "5",
-      "description": "force.md",
-      "completedDescription": "force_complete.md",
-      "levelContract": "ForceFactory.sol",
-      "instanceContract": "Force.sol",
-      "revealCode": true,
-      "deployParams": [],
-      "deployFunds": 0,
-      "deployId": "7",
-      "instanceGas": 150000,
-      "author": "ajsantander"
-    },
-    {
       "name": "Vault",
       "created": "2018-03-18",
       "difficulty": "3",
