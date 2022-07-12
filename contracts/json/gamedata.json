@@ -1,21 +1,6 @@
 {
   "levels": [
     {
-      "name": "Token",
-      "created": "2017-11-01",
-      "difficulty": "3",
-      "description": "token.md",
-      "completedDescription": "token_complete.md",
-      "levelContract": "TokenFactory.sol",
-      "instanceContract": "Token.sol",
-      "revealCode": true,
-      "deployParams": [],
-      "deployFunds": 0,
-      "deployId": "5",
-      "instanceGas": 330000,
-      "author": "ajsantander"
-    },
-    {
       "name": "Delegation",
       "created": "2017-11-01",
       "difficulty": "4",
