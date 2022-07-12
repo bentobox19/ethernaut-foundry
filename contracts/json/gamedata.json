@@ -1,21 +1,6 @@
 {
   "levels": [
     {
-      "name": "Delegation",
-      "created": "2017-11-01",
-      "difficulty": "4",
-      "description": "delegate.md",
-      "completedDescription": "delegate_complete.md",
-      "levelContract": "DelegationFactory.sol",
-      "instanceContract": "Delegation.sol",
-      "revealCode": true,
-      "deployParams": [],
-      "deployFunds": 0,
-      "deployId": "6",
-      "instanceGas": 250000,
-      "author": "ajsantander"
-    },
-    {
       "name": "Force",
       "created": "2017-11-01",
       "difficulty": "5",
