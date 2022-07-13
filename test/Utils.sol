@@ -6,7 +6,7 @@ import "forge-std/Vm.sol";
 interface ILevel {}
 
 interface IEthernaut {
-  function createLevelInstance(ILevel) external;
+  function createLevelInstance(ILevel) external payable;
   function submitLevelInstance(address payable) external;
 }
 
@@ -15,10 +15,18 @@ library utils {
   IEthernaut internal constant ethernaut = IEthernaut(0xD991431D8b033ddCb84dAD257f4821E9d5b38C33);
 
   function createLevelInstance(address _levelFactory) external returns (address) {
+    return _createLevelInstance(_levelFactory, 0);
+  }
+
+  function createLevelInstance(address _levelFactory, uint256 _value) external returns (address) {
+    return _createLevelInstance(_levelFactory, _value);
+  }
+
+  function _createLevelInstance(address _levelFactory, uint256 _value) private returns (address) {
     ILevel level = ILevel(_levelFactory);
 
     vm.recordLogs();
-    ethernaut.createLevelInstance(level);
+    ethernaut.createLevelInstance{value: _value}(level);
 
     Vm.Log[] memory entries = vm.getRecordedLogs();
 

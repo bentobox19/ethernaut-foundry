@@ -1,21 +1,6 @@
 {
   "levels": [
     {
-      "name": "King",
-      "created": "2017-11-24",
-      "difficulty": "6",
-      "description": "king.md",
-      "completedDescription": "king_complete.md",
-      "levelContract": "KingFactory.sol",
-      "instanceContract": "King.sol",
-      "revealCode": true,
-      "deployParams": [],
-      "deployFunds": 0.001,
-      "deployId": "9",
-      "instanceGas": 350000,
-      "author": "ajsantander"
-    },
-    {
       "name": "Re-entrancy",
       "created": "2017-11-01",
       "difficulty": "6",
