@@ -1,21 +1,6 @@
 {
   "levels": [
     {
-      "name": "Re-entrancy",
-      "created": "2017-11-01",
-      "difficulty": "6",
-      "description": "reentrancy.md",
-      "completedDescription": "reentrancy_complete.md",
-      "levelContract": "ReentranceFactory.sol",
-      "instanceContract": "Reentrance.sol",
-      "revealCode": true,
-      "deployParams": [],
-      "deployFunds": 0.001,
-      "deployId": "10",
-      "instanceGas": 350000,
-      "author": "ajsantander"
-    },
-    {
       "name": "Elevator",
       "created": "2017-01-25",
       "difficulty": "4",
