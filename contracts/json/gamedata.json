@@ -1,21 +1,6 @@
 {
   "levels": [
     {
-      "name": "Vault",
-      "created": "2018-03-18",
-      "difficulty": "3",
-      "description": "vault.md",
-      "completedDescription": "vault_complete.md",
-      "levelContract": "VaultFactory.sol",
-      "instanceContract": "Vault.sol",
-      "revealCode": true,
-      "deployParams": [],
-      "deployFunds": 0,
-      "deployId": "8",
-      "instanceGas": 200000,
-      "author": "syncikin"
-    },
-    {
       "name": "King",
       "created": "2017-11-24",
       "difficulty": "6",
