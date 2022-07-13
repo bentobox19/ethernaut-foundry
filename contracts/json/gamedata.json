@@ -1,21 +1,6 @@
 {
   "levels": [
     {
-      "name": "Elevator",
-      "created": "2017-01-25",
-      "difficulty": "4",
-      "description": "elevator.md",
-      "completedDescription": "elevator_complete.md",
-      "levelContract": "ElevatorFactory.sol",
-      "instanceContract": "Elevator.sol",
-      "revealCode": true,
-      "deployParams": [],
-      "deployFunds": 0,
-      "deployId": "11",
-      "instanceGas": 250000,
-      "author": "martriay"
-    },
-    {
       "name": "Privacy",
       "created": "2018-04-06",
       "difficulty": "8",
