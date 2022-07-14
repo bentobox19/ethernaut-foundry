@@ -35,7 +35,6 @@ contract Building {
   }
 }
 
-
 contract ElevatorTest is Test {
   address internal challengeAddress;
   Building internal building;
