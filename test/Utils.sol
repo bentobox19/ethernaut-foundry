@@ -30,7 +30,7 @@ library utils {
 
     Vm.Log[] memory entries = vm.getRecordedLogs();
 
-    return address(abi.decode(entries[0].data, (address)));
+    return address(abi.decode(entries[entries.length - 1].data, (address)));
   }
 
   function submitLevelInstance(address _instance) external {
