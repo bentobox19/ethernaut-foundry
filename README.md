@@ -26,7 +26,7 @@ forge test --fork-url https://eth-goerli.g.alchemyapi.io/v2/<API-KEY> --fork-blo
 
 ### Add traces
 
-There are differnt level of verbosities, `-vvvvv` is the maximum.
+There are different level of verbosities, `-vvvvv` is the maximum.
 
 ```bash
 forge test --fork-url https://eth-goerli.g.alchemyapi.io/v2/<API-KEY> --fork-block-number 8400000 --match-contract Hello -vvvvv
