@@ -16,7 +16,7 @@ contract NaughtCoinTest is Test {
   INaughtCoin internal nc;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0x096bb5e93a204BfD701502EB6EF266a950217218);
+    challengeAddress = utils.createLevelInstance(0x36E92B2751F260D6a4749d7CA58247E7f8198284);
     nc = INaughtCoin(challengeAddress);
   }
 

@@ -49,7 +49,7 @@ contract DexTest is Test {
   DexAttacker internal attackContract;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0xC084FC117324D7C628dBC41F17CAcAaF4765f49e);
+    challengeAddress = utils.createLevelInstance(0x9CB391dbcD447E645D6Cb55dE6ca23164130D008);
     dex = IDex(challengeAddress);
     dex.approve(challengeAddress, 100);
     attackContract = new DexAttacker();

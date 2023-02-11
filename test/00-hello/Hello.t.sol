@@ -13,7 +13,7 @@ contract HelloTest is Test {
   IInstance internal challenge;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0x4E73b858fD5D7A5fc1c3455061dE52a53F35d966);
+    challengeAddress = utils.createLevelInstance(0xBA97454449c10a0F04297022646E7750b8954EE8);
     challenge = IInstance(challengeAddress);
   }
 

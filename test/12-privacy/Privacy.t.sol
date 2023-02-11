@@ -8,7 +8,7 @@ contract PrivacyTest is Test {
   address internal challengeAddress;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0x11343d543778213221516D004ED82C45C3c8788B);
+    challengeAddress = utils.createLevelInstance(0xcAac6e4994c2e21C5370528221c226D1076CfDAB);
   }
 
   function testExploit() public {

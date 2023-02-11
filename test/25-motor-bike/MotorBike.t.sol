@@ -22,7 +22,7 @@ contract MotorBikeTest is Test {
   IEngine engine;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0x58Ab506795EC0D3bFAE4448122afa4cDE51cfdd2);
+    challengeAddress = utils.createLevelInstance(0x9b261b23cE149422DE75907C6ac0C30cEc4e652A);
 
     runExploit();
   }

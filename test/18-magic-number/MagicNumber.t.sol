@@ -8,7 +8,7 @@ contract MagicNumberTest is Test {
   address internal challengeAddress;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0x200d3d9Ac7bFd556057224e7aEB4161fED5608D0);
+    challengeAddress = utils.createLevelInstance(0xFe18db6501719Ab506683656AAf2F80243F8D0c0);
   }
 
   function testExploit() public {

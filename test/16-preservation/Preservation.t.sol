@@ -23,7 +23,7 @@ contract PreservationTest is Test {
   address internal challengeAddress;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0x97E982a15FbB1C28F6B8ee971BEc15C78b3d263F);
+    challengeAddress = utils.createLevelInstance(0x2754fA769d47ACdF1f6cDAa4B0A8Ca4eEba651eC);
   }
 
   function testExploit() public {

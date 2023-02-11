@@ -3,6 +3,8 @@ pragma solidity >=0.8.0;
 
 import "forge-std/Vm.sol";
 
+import "forge-std/console.sol";
+
 interface ILevel {}
 
 interface IEthernaut {
@@ -12,7 +14,7 @@ interface IEthernaut {
 
 library utils {
   Vm public constant vm = Vm(address(bytes20(uint160(uint256(keccak256('hevm cheat code'))))));
-  IEthernaut internal constant ethernaut = IEthernaut(0xD991431D8b033ddCb84dAD257f4821E9d5b38C33);
+  IEthernaut internal constant ethernaut = IEthernaut(0xD2e5e0102E55a5234379DD796b8c641cd5996Efd);
 
   function createLevelInstance(address _levelFactory) external returns (address) {
     return _createLevelInstance(_levelFactory, 0);
@@ -30,7 +32,7 @@ library utils {
 
     Vm.Log[] memory entries = vm.getRecordedLogs();
 
-    return address(abi.decode(entries[entries.length - 1].data, (address)));
+    return address(uint160(uint256(entries[entries.length - 1].topics[2])));
   }
 
   function submitLevelInstance(address _instance) external {

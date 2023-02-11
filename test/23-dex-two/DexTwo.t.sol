@@ -21,7 +21,7 @@ contract NoToken {
 
 contract DexTwoTest is Test {
   function testExploit() public {
-    address challengeAddress = utils.createLevelInstance(0x5026Ff8C97303951c255D3a7FDCd5a1d0EF4a81a);
+    address challengeAddress = utils.createLevelInstance(0x0b6F6CE4BCfB70525A31454292017F640C10c768);
 
     IDexTwo dex = IDexTwo(challengeAddress);
 

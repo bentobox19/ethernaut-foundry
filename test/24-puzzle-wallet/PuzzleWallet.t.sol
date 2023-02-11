@@ -16,7 +16,7 @@ contract PuzzleWalletTest is Test {
   address internal challengeAddress;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0xe13a4a46C346154C41360AAe7f070943F67743c9, 0.001 ether);
+    challengeAddress = utils.createLevelInstance(0x4dF32584890A0026e56f7535d0f2C6486753624f, 0.001 ether);
   }
 
   function testExploit() public {
