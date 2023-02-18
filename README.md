@@ -21,7 +21,7 @@ forge test --fork-url https://eth-goerli.g.alchemy.com/v2/<API-KEY> --fork-block
 ## Running a single challenge
 
 ```bash
-forge test --fork-url https://eth-goerli.g.alchemyapi.io/v2/<API-KEY> --fork-block-number 8400000 --match-contract Hello
+forge test --fork-url https://eth-goerli.g.alchemy.com/v2/<API-KEY> --fork-block-number 8400000 --match-contract Hello
 ```
 
 ### Add traces
@@ -29,5 +29,5 @@ forge test --fork-url https://eth-goerli.g.alchemyapi.io/v2/<API-KEY> --fork-blo
 There are different level of verbosities, `-vvvvv` is the maximum.
 
 ```bash
-forge test --fork-url https://eth-goerli.g.alchemyapi.io/v2/<API-KEY> --fork-block-number 8400000 --match-contract Hello -vvvvv
+forge test --fork-url https://eth-goerli.g.alchemy.com/v2/<API-KEY> --fork-block-number 8400000 --match-contract Hello -vvvvv
 ```
