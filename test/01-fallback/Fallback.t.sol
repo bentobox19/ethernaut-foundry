@@ -27,7 +27,7 @@ contract FallbackTest is Test {
     (bool success,) = address(challengeAddress).call{value: 1 wei}("");
     require(success, "receiver rejected ETH transfer");
 
-    // See receive() below
+    // See the comment in receive() below
     challenge.withdraw();
 
     utils.submitLevelInstance(challengeAddress);
