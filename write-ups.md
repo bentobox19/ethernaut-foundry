@@ -164,3 +164,41 @@ Other links for further reading
 * https://docs.soliditylang.org/en/v0.8.18/contracts.html#fallback-function
 * https://solidity-by-example.org/fallback/
 * https://solidity-by-example.org/sending-ether/
+
+## 01 Fallout
+
+To beat this level, we need to comply with
+
+```solidity
+return instance.owner() == _player;
+```
+
+### Solution
+
+We see that the only code where the owner is assigned is
+
+```solidity
+/* constructor */
+function Fal1out() public payable {
+  owner = msg.sender;
+  allocations[owner] = msg.value;
+}
+```
+
+Some thoughts here, first from the 0.8.18 solidity documentation
+
+> Prior to version 0.4.22, constructors were defined as functions with the same name as the contract. This syntax was deprecated and is not allowed anymore in version 0.5.0.
+
+That means that the constructor function has to be named `constructor()`.
+
+Also, notice that the name of the function is `Fal1out`, which differs in the 4th character with the name of the contract `Fallout`.
+
+So, we can just assign `owner` by just invoking the function.
+
+```solidity
+challenge.Fal1out();
+```
+
+### References
+
+* https://docs.soliditylang.org/en/v0.8.18/contracts.html#constructors
