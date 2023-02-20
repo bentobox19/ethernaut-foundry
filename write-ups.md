@@ -103,7 +103,8 @@ function contribute() public payable {
 
 So, to solve this level:
 
-* First, we call `contribute()` with one wei, then we `call()` the contract  with another wei (`msg.value > 0` control).
+* First, we call `contribute()` with one wei.
+* Then we `call()` the contract  with another wei (`msg.value > 0` control).
 * After that we are the owner of the contract and can `withdraw()` the funds.
 * Now, notice that in our test we are invoking the level from a contract (as opposed from an EOA), so we need to include a `receive()` function ourselves.
 
