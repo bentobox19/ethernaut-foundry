@@ -1,4 +1,4 @@
-# Write Up
+# Write Ups
 
 ## 00 Hello
 
