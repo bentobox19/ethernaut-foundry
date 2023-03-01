@@ -320,8 +320,6 @@ The check at the factory will work as it is perform by the test contract.
 * https://ethereum.stackexchange.com/a/1892
 * https://hackernoon.com/hacking-solidity-contracts-using-txorigin-for-authorization-are-vulnerable-to-phishing
 
-
------------------------------------------------------
 ## 05 Token
 
 To beat this level, we need to comply with
@@ -349,3 +347,61 @@ challenge.transfer(msg.sender, 2**256 - 1);
 * https://solidity-by-example.org/hacks/overflow/
   * Notice that for `Solidity >= 0.8`, default behaviour of Solidity 0.8 for overflow / underflow is to throw an error.
 * https://hackernoon.com/hack-solidity-integer-overflow-and-underflow
+
+## 06 Delegation
+
+To beat this level, we need to comply with
+
+```solidity
+parity.owner() == _player;
+```
+
+### Solution
+
+So `Delegation.fallback()` uses `delegatecall()`.
+
+From the solidity documentation:
+
+> There exists a special variant of a message call, named `delegatecall` which is identical to a message call apart from the fact that the code at the target address is executed in the context (i.e. at the address) of the calling contract and `msg.sender` and `msg.value` do not change their values.
+
+The function `delegatecall()` allows us to use code akin to using libraries in other languages.
+
+Them, what happens here? If we manage to arrive to the `fallback()` function of `Delegation`:
+
+```solidity
+fallback() external {
+  (bool result,) = address(delegate).delegatecall(msg.data);
+  if (result) {
+    this;
+  }
+}
+```
+
+Making sure that `msg.data` contains the value `abi.encodeWithSignature("pwn()")`...
+
+... The function `Delegate.pwn()` will be executed:
+
+```solidity
+function pwn() public {
+  owner = msg.sender;
+}
+```
+
+Now, since this is a delegate call:
+
+1. `msg.sender` will not be the address of `Delegation`, but the address of its caller, as the context of the calling contract does not change its value.
+
+2. the `owner` variable in `Delegate` points to the slot `0` of the `Delegate` contract, this is relevant, we can see that the slot `o` of the `Delegation` contract is also its `owner` variable. Then the code `owner = msg.sender;` will change ownership in `Delegation`.
+
+
+The solution then is just
+
+```solidity
+(bool success,) = challengeAddress.call(abi.encodeWithSignature("pwn()"));
+success;
+```
+
+### References
+
+* https://docs.soliditylang.org/en/v0.8.19/introduction-to-smart-contracts.html#delegatecall-and-libraries
+* https://solidity-by-example.org/delegatecall/
