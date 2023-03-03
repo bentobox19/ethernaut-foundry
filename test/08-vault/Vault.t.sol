@@ -17,7 +17,7 @@ contract VaultTest is Test {
     // imagine this attack being made from a forge script
     bytes32 password = vm.load(challengeAddress, bytes32(uint256(1)));
 
-    // too lazy to write the interface code above?
+    // too lazy to write code for an interface? Just do the call
     (bool success,) = challengeAddress.call(abi.encodeWithSignature("unlock(bytes32)", password));
     success;
 

