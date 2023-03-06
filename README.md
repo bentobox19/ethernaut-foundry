@@ -2,6 +2,10 @@
 
 * Porting in [foundry-rs](https://github.com/foundry-rs/foundry) of the solutions for [The Ethernaut CTF](https://github.com/OpenZeppelin/ethernaut).
 
+## Writeups
+
+* Discussion of the solutions at the [writeups.md](writeups.md) document.
+
 ## Install forge
 
 * Follow the [instructions](https://book.getfoundry.sh/getting-started/installation.html) to install [Foundry](https://github.com/foundry-rs/foundry).
