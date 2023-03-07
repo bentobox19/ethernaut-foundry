@@ -633,3 +633,50 @@ receive() external payable {
 * https://solidity-by-example.org/hacks/re-entrancy/
 * https://hackernoon.com/hack-solidity-reentrancy-attack
 * https://medium.com/valixconsulting/solidity-smart-contract-security-by-example-02-reentrancy-b0c08cfcd555
+
+## 11 Elevator
+
+To beat this level, we need to comply with
+
+```solidity
+elevator.top();
+```
+
+### Solution
+
+The `Elevator` contract has a boolean `top` variable, which initializes to `false`.
+
+The `top` variable is manipulated at the `goTo()` function, which uses `Building.isLastFloor`. Notice that `Building` is an interface, so we have to implement our own contract, also that as `Building building = Building(msg.sender);` in the `goTo()` function, we have to call the latter from this contract.
+
+The logic of the elevator has some points of interest
+
+```solidity
+if (! building.isLastFloor(_floor)) {
+  floor = _floor;
+  top = building.isLastFloor(floor);
+}
+```
+
+* If `isLastFloor` evaluates to `true`, we cannot enter the code block, meaning that we cannot get to modify `top`.
+* If `isLastFloor` evaluates to `false`, then we enter the code block, but `top` becomes `false`.
+
+So, to beat this level, we want to write `isLastFloor` such that the first time is called, it returns `false`, then it returns `true`.
+
+```solidity
+bool flag;
+
+// this function needs to answers false the first time,
+// and then true the second one.
+function isLastFloor(uint256) external returns (bool) {
+  if (flag) {
+    return true;
+  } else {
+    flag = true;
+    return false;
+  }
+}
+```
+
+### References
+
+* https://docs.soliditylang.org/en/v0.8.19/types.html#booleans

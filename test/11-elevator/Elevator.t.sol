@@ -23,14 +23,14 @@ contract Building {
     elevator.goTo(0);
   }
 
-  // this function needs to answers _false_ the first time,
-  // and then _true_ the second one.
+  // this function needs to answers false the first time,
+  // and then true the second one.
   function isLastFloor(uint256) external returns (bool) {
-    if (!flag) {
+    if (flag) {
+      return true;
+    } else {
       flag = true;
       return false;
-    } else {
-      return true;
     }
   }
 }
@@ -46,7 +46,6 @@ contract ElevatorTest is Test {
 
   function testExploit() public {
     building.solveChallenge();
-
     utils.submitLevelInstance(challengeAddress);
   }
 }
