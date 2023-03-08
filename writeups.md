@@ -701,7 +701,7 @@ data[2] = keccak256(abi.encodePacked(tx.origin,"2"));
 Privacy instance = new Privacy(data);
 ```
 
-To unlock the level, we most know teh value of `data[2]`.
+To unlock the level, we must know the value of `data[2]`.
 
 ```solidity
 function unlock(bytes16 _key) public {
