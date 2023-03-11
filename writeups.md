@@ -788,20 +788,39 @@ require(uint32(uint64(_gateKey)) != uint64(_gateKey), "GatekeeperOne: invalid ga
 require(uint32(uint64(_gateKey)) == uint16(uint160(tx.origin)), "GatekeeperOne: invalid gateThree part three");
 ```
 
-`console.log()` the operations on `0x1122334455667788`, use your fav REPL to get the hex conversions
+Use `chisel` or your favorite REPL to check the operations on `0x1122334455667788`.
 
-```
-//
-   uint32(uint64(_gateKey))   -> 0x1122334455667788 => 0x55667788
-   uint16(uint64(_gateKey))   -> 0x1122334455667788 => 0x00007788
-   uint64(_gateKey)           -> 0x1122334455667788 => 0x1122334455667788
-   uint16(uint160(tx.origin)) -> 0x00a3...ea72 => ea72
-//
+
+```bash
+$ chisel
+
+➜ _gateKey = 0x1122334455667788
+
+➜ uint32(uint64(_gateKey))
+Type: uint
+├ Hex: 0x55667788
+
+➜ uint16(uint64(_gateKey))
+Type: uint
+├ Hex: 0x7788
+
+➜ uint64(_gateKey)
+Type: uint
+├ Hex: 0x1122334455667788
+
+➜ uint16(uint160(0xabcd9a9e9aa1c9db991c7721a92d351db4fac990))
+Type: uint
+├ Hex: 0xc990
 ```
 
-- gateThree part one can be true with `0x1122334400007788`
-- gateThree part two needs both to be different, which is true
-- gateThree part three, make `7788` equal to the last hex digits of tx.origin
+- `uint32(uint64(_gateKey)) == uint16(uint64(_gateKey))`
+  - can be true with `0x1122334400007788`.
+
+- `uint32(uint64(_gateKey)) != uint64(_gateKey)`
+  - needs both to be different, which is true
+
+- `uint32(uint64(_gateKey)) == uint16(uint160(tx.origin))`
+  - make `7788` equal to the last hex digits of tx.origin
   - ex: `0x1122334400007788` => `0x112233440000ea72`
   - in fact, it can be 0x100000000000ea72,
   - which makes it straighforward to get analytically.
@@ -824,3 +843,22 @@ Putting all the elements together:
 ### References
 
 * https://docs.soliditylang.org/en/v0.8.19/contracts.html#function-modifiers
+* https://docs.soliditylang.org/en/v0.8.19/cheatsheet.html#global-variables
+  * `gasleft() returns (uint256)`: remaining gas
+* https://github.com/foundry-rs/foundry/tree/master/chisel
+
+## 14 Gatekepper Two
+
+To beat this level, we need to comply with
+
+```solidity
+instance.entrant() == _player;
+```
+
+### Solution
+
+???
+
+### References
+
+* ???
