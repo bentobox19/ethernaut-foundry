@@ -38,8 +38,8 @@ contract GatekeeperOneTest is Test {
     //   is passed through by using a proxy contract
     //
     // gateTwo
-    //   just brute force it
-    //   ee are running in a fork
+    //   just brute force it,
+    //   these tests are running in a fork
     //
     // gateThree
     //   console.log() the operations on 0x1122334455667788
@@ -60,6 +60,7 @@ contract GatekeeperOneTest is Test {
     Proxy proxy = new Proxy(challengeAddress);
     bytes8 key = bytes8(uint16(uint160(tx.origin)) + 0x1000000000000000);
 
+    // this loop is to brute-force the gateTwo
     for (uint i = 27000; i > 0; i--) {
       if (proxy.enter{gas: i}(key)) {
         require(challengeFactory.validateInstance(payable(challengeAddress), tx.origin));
