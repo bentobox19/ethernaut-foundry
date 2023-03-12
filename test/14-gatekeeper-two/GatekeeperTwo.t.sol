@@ -47,7 +47,7 @@ contract GatekeeperTwoTest is Test {
     // gateThree
     //   if Constant ^ key = 0xff
     //   then key = 0xff ^ constant
-    //   notice that they are checking agains msg.sender,
+    //   notice that they are checking against msg.sender,
     //   so compute the key at the proxy
 
 
@@ -56,6 +56,5 @@ contract GatekeeperTwoTest is Test {
     proxy;
 
     require(challengeFactory.validateInstance(payable(challengeAddress), tx.origin));
-
   }
 }

