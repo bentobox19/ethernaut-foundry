@@ -877,11 +877,11 @@ require(x == 0);
 
 As the [Ethereum Yellow Paper](https://ethereum.github.io/yellowpaper/paper.pdf)
 
-  7.1. Subtleties. Note that while the initialisation code is executing, the newly created address exists but with no intrinsic body code.
+> 7.1. Subtleties. Note that while the initialisation code is executing, the newly created address exists but with no intrinsic body code.
 
 and the foot note in that page
 
-  During initialization code execution, EXTCODESIZE on the address should return zero, which is the length of the code of the account while CODESIZE should return the length of the initialization code (as defined in H.2).
+> During initialization code execution, EXTCODESIZE on the address should return zero, which is the length of the code of the account while CODESIZE should return the length of the initialization code (as defined in H.2).
 
 Meaning that `extcodesize(caller())` will return `0` during the creation of the contract. In other words, we need to introduce our attack **at the constructor of the contract** we are using to attack the level.
 
