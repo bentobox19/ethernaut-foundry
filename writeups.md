@@ -1051,3 +1051,75 @@ success;
 
 * https://docs.soliditylang.org/en/v0.8.19/introduction-to-smart-contracts.html#delegatecall-and-libraries
 * https://solidity-by-example.org/delegatecall/
+
+## 17 Recovery
+
+## 16 Preservation
+
+To beat this level, we need to comply with
+
+```solidity
+address(lostAddress[_instance]).balance == 0;
+```
+
+### Solution
+
+We see that `lostAddress[_instance]` was assigned at the factory with the value `address(uint160(uint256(keccak256(abi.encodePacked(uint8(0xd6), uint8(0x94), recoveryInstance, uint8(0x01))))))`. What is this?
+
+#### Address of a created contract
+
+Looking at the Yellow Paper, "Contract Creation":
+
+  The address of the new account is defined as being the rightmost 160 bits of the Keccak-256 hash of the RLP encoding of the structure containing only the sender and the account nonce.
+
+That is, in solidity language
+
+```solidity
+address(uint160(uint256(keccak256(abi.encodePacked(uint8(0xd6), uint8(0x94), senderAddress, nonce)))))
+```
+
+#### Recursive Lenght Prefix (RLP) applied
+
+The `0xd6` and `0x94` are part of RLP:
+
+* As the `senderAddress` contains 20 bytes `0x14`, then it will have a prefix of `0x80` (string between 0-55 bytes) + `0x14` (length of the string) = `0x94`.
+* As this `senderAddress` goes in a structure with the `nonce` (only one byte), we have 1 byte of the RLP prefix of `senderAddress`.
+* The 20 bytes of `senderAddress`, and the 1 byte of `none`. That is 1 + 20 + 1 = 22 bytes `0x16`.
+  * The prefix of this list is `0xc0` (list of 0-55 bytes) + `0x16` = `0xd6`.
+
+#### Back to the problem
+
+This means that the factory assigned to `lostAddress[address(recoveryInstance)]` the address of the created instance of `SimpleToken`. As the factory is giving us the address of the instance of `Recovery`, we can compute ourselves this address.
+
+Now, notice that `SimpleToken` has this function
+
+```solidity
+// clean up after ourselves
+function destroy(address payable _to) public {
+  selfdestruct(_to);
+}
+```
+
+Since the problem asks us to make the balance of this instance `0`, we can beat the level by just invoking this function.
+
+#### Putting all together
+
+```solidity
+function testExploit() public {
+  address lostAddress = address(
+    uint160(
+      uint256(
+        keccak256(
+          abi.encodePacked(
+            uint8(0xd6), uint8(0x94), challengeAddress, uint8(0x01))))));
+
+  (bool success,) = lostAddress.call(abi.encodeWithSignature("destroy(address)", address(this)));
+  success;
+```
+
+### References
+
+* https://ethereum.github.io/yellowpaper/paper.pdf
+  * See "Contract Creation" section
+  * See "Appendix B: Recursive Length Prefix" (RLP)
+* https://medium.com/coinmonks/data-structure-in-ethereum-episode-1-recursive-length-prefix-rlp-encoding-decoding-d1016832f919
