@@ -1070,7 +1070,7 @@ We see that `lostAddress[_instance]` was assigned at the factory with the value 
 
 Looking at the Yellow Paper, "Contract Creation":
 
-  The address of the new account is defined as being the rightmost 160 bits of the Keccak-256 hash of the RLP encoding of the structure containing only the sender and the account nonce.
+> The address of the new account is defined as being the rightmost 160 bits of the Keccak-256 hash of the RLP encoding of the structure containing only the sender and the account nonce.
 
 That is, in solidity language
 
