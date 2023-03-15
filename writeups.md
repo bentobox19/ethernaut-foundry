@@ -1220,8 +1220,7 @@ assembly {
 Invoke the function afterwards to set the contract
 
 ```solidity
-(bool success,) = challengeAddress.call(abi.encodeWithSignature("setSolver(address)", solverAddress));
-success;
+challenge.setSolver(solverAddress);
 ```
 
 ### References
