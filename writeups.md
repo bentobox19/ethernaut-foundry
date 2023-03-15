@@ -1054,8 +1054,6 @@ success;
 
 ## 17 Recovery
 
-## 16 Preservation
-
 To beat this level, we need to comply with
 
 ```solidity
@@ -1123,3 +1121,113 @@ function testExploit() public {
   * See "Contract Creation" section
   * See "Appendix B: Recursive Length Prefix" (RLP)
 * https://medium.com/coinmonks/data-structure-in-ethereum-episode-1-recursive-length-prefix-rlp-encoding-decoding-d1016832f919
+
+## 18 Magic Number
+
+To beat this level, we need to comply with
+
+```solidity
+// Retrieve the instance.
+MagicNum instance = MagicNum(_instance);
+
+// Retrieve the solver from the instance.
+Solver solver = Solver(instance.solver());
+
+// Query the solver for the magic number.
+bytes32 magic = solver.whatIsTheMeaningOfLife();
+if(magic != 0x000000000000000000000000000000000000000000000000000000000000002a) return false;
+
+// Require the solver to have at most 10 opcodes.
+uint256 size;
+assembly {
+  size := extcodesize(solver)
+}
+if(size > 10) return false;
+```
+
+In other words, create a contract with 10 opcodes, able to return to you the number 42.
+
+### Solution
+
+Crafting opcodes is an art. Here is [an excellent writeup](https://medium.com/coinmonks/ethernaut-lvl-19-magicnumber-walkthrough-how-to-deploy-contracts-using-raw-assembly-opcodes-c50edb0f71a2) explaining what to do to beat this level. We will try and summarize the steps in here.
+
+#### What happens during contract creation
+
+1. First, a user or contract sends a transaction to the Ethereum network.
+2. During contract creation, the EVM only executes the `initialization code`.
+3. After this initialization code is run, only the runtime code remains on the stack.
+4. Finally, the EVM stores this returned, surplus code in the state storage, in association with the new contract address.
+
+To beat this level, two sets of codes are needed: Initialization opcodes, and Runtime opcodes.
+
+#### `Runtime opcodes`
+
+You want the contract to return 0x42, regardless of what function is called.
+
+> Before you can return a value, first you have to store it in memory.
+
+We arbitrarily choose the memory position `0x80`
+
+```assembly
+602a    // v: push1 0x2a (value is 0x2a)
+6080    // p: push1 0x80 (memory slot is 0x80)
+52      // mstore
+
+6020    // s: push1 0x20 (value is 32 bytes in size)
+6080    // p: push1 0x80 (value was stored in slot 0x80)
+f3      // return
+```
+
+The resulting runtime opcodes are `602a60805260206080f3`: Ten bytes.
+
+Now we want to add the `constructor()` code, also called `Initialization opcodes`.
+
+#### `Initialization opcodes`
+
+`codecopy` needs three arguments: `s`, `f`, and `t`. `s` is 10 bytes (see above), To know `f`, we need to know how many bytes we are using at this initialization, and we choose `t` arbitrarily to be at `0x00`.
+
+Then, we return the in-memory runtime opcodes to the EVM.
+
+```assembly
+600a    // s: push1 0x0a (10 bytes)
+60??    // f: push1 0x?? (current position of runtime opcodes)
+6000    // t: push1 0x00 (destination memory index 0)
+39      // CODECOPY
+
+600a    // s: push1 0x0a (runtime opcode length)
+6000    // p: push1 0x00 (access memory index 0)
+f3      // return to EVM
+```
+
+As this routine uses 12 bytes, we replace `??` by `0x0c`. So we have `600a600c600039600a6000f3`.
+
+The byte sequence then is `0x600a600c600039600a6000f3602a60805260206080f3`
+
+#### Putting everything together
+
+Use some assembly here to create the contract
+
+```solidity
+bytes memory bytecode = hex"600a600c600039600a6000f3602a60005260206000f3";
+bytes32 salt = 0;
+address solverAddress;
+
+assembly {
+    solverAddress := create2(0, add(bytecode, 0x20), mload(bytecode), salt)
+}
+```
+
+Invoke the function afterwards to set the contract
+
+```solidity
+(bool success,) = challengeAddress.call(abi.encodeWithSignature("setSolver(address)", solverAddress));
+success;
+```
+
+### References
+
+* https://medium.com/coinmonks/ethernaut-lvl-19-magicnumber-walkthrough-how-to-deploy-contracts-using-raw-assembly-opcodes-c50edb0f71a2
+* https://medium.com/@blockchain101/solidity-bytecode-and-opcode-basics-672e9b1a88c2
+* https://blog.openzeppelin.com/deconstructing-a-solidity-contract-part-i-introduction-832efd2d7737/
+* https://docs.soliditylang.org/en/v0.8.19/assembly.html
+* https://docs.soliditylang.org/en/v0.8.19/yul.html#evm-dialect
