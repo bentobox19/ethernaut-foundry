@@ -1418,7 +1418,7 @@ interface Buyer {
 }
 ```
 
-The difficulty we find is that they function `price()` that *we have to provide* is a `view`. As such, we cannot just add a boolean that we modify at the second visit, just like the [Elevator](#11-elevator) level.
+The difficulty we find is that they function `price()` that *we have to provide* is a `view`. As such, we cannot just add a boolean that we modify at the second visit, like in the [Elevator](#11-elevator) level.
 
 Now, the `Shop` contract has two variables
 
@@ -1431,7 +1431,7 @@ contract Shop {
 }
 ```
 
-We can access the variable `bool public isSold;`, with `IsSold()`. To avoid compiler problems, as `price()` is a `view`, we just compose an interface `IShop`
+We can access the variable `bool public isSold;`, with `isSold()`. To avoid compiler problems, as `price()` is a `view`, we just compose an interface `IShop`
 
 ```solidity
 interface IShop {
