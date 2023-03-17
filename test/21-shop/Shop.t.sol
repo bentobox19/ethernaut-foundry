@@ -12,8 +12,8 @@ interface IShop {
 contract ShopAttack {
   IShop internal challenge;
 
-  constructor(address _challengeAddress) {
-    challenge = IShop(_challengeAddress);
+  constructor(address challengeAddress) {
+    challenge = IShop(challengeAddress);
   }
 
   function attack() public {
@@ -34,13 +34,11 @@ contract ShopTest is Test {
 
   function setUp() public {
     challengeAddress = utils.createLevelInstance(0xCb1c7A4Dee224bac0B47d0bE7bb334bac235F842);
-
     attackContract = new ShopAttack(challengeAddress);
   }
 
   function testExploit() public {
     attackContract.attack();
-
     utils.submitLevelInstance(challengeAddress);
   }
 }

