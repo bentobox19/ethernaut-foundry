@@ -1454,3 +1454,20 @@ function price() public view returns (uint) {
 ### References
 
 * https://docs.soliditylang.org/en/v0.8.19/contracts.html#view-functions
+
+## 22 Dex
+
+To beat this level, we need to comply with
+
+```solidity
+IERC20(token1).balanceOf(_instance) == 0 || ERC20(token2).balanceOf(_instance) == 0
+```
+
+### Solution
+
+???
+
+### References
+
+* https://eips.ethereum.org/EIPS/eip-20
+* https://docs.openzeppelin.com/contracts/4.x/erc20
