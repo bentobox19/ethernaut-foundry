@@ -1617,9 +1617,25 @@ In here, all logic to `owner` will work with slot 0, and interactions with `maxB
 
 As the mission is to become `admin`. If we are able to leverage the code from the `PuzzleWallet` contract to modify `maxBalance`, we can beat the level.
 
-#### ????
+How can we do this? With the following chain in reverse order
 
-???
+* `function setMaxBalance(uint256 _maxBalance) external onlyWhitelisted` to make `maxBalance` the player's address.
+  * Since it has a modifier `onlyWhitelisted`,
+  * We add the address to the whitelist with `function addToWhitelist(address addr) external`.
+    * Since it has a control `require(msg.sender == owner, "Not the owner")`,
+    * We make the player owner by exploiting the storage overlap at `function proposeNewAdmin(address _newAdmin) external`
+
+All nice and fancy, now, the problem with `setMaxBalance` is the following control:
+
+```solidity
+require(address(this).balance == 0, "Contract balance is not 0");
+```
+
+Which we are going to address in the next sub section.
+
+#### Draining the balance of the Puzzle Wallet
+
+
 
 ### References
 
