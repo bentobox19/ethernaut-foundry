@@ -1580,3 +1580,53 @@ function testExploit() public {
 * https://eips.ethereum.org/EIPS/eip-20
 * https://docs.openzeppelin.com/contracts/4.x/erc20
 * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/f8e3c375d19bd12f54222109dd0801c0e0b60dd2/contracts/token/ERC20/IERC20.sol
+
+## 24 Puzzle Wallet
+
+To beat this level, we need to comply with
+
+```solidity
+proxy.admin() == _player
+```
+
+### Solution
+
+So `PuzzleProxy` is an instance of `UpgradeableProxy`. This means that we can give and upgrade an `_implementation` which is the layer where the logic is. Problem with proxies is which pattern we use to store data: The state is in the proxy, with the logic layer operating on the contaxt of this proxy. It is in essence a `delegatecall`. Then, if we are not careful, we can overwrite with our implementation the state in an undesirable way.
+
+#### Proxies and Slots
+
+Look at the state at the proxy
+
+```solidity
+address public pendingAdmin;
+address public admin;
+```
+
+This is, the slot 0 contains the variable `pendingAdmin`, and the slot 1 the variable `admin`.
+
+While at the implementation
+
+```solidity
+address public owner;
+uint256 public maxBalance;
+mapping(address => bool) public whitelisted;
+mapping(address => uint256) public balances;
+```
+
+In here, all logic to `owner` will work with slot 0, and interactions with `maxBalance` with slot 1.
+
+As the mission is to become `admin`. If we are able to leverage the code from the `PuzzleWallet` contract to modify `maxBalance`, we can beat the level.
+
+#### ????
+
+???
+
+### References
+
+* https://blog.openzeppelin.com/proxy-patterns/
+* https://docs.openzeppelin.com/upgrades-plugins/1.x/proxies
+* https://eips.ethereum.org/EIPS/eip-1967
+* https://docs.openzeppelin.com/contracts/4.x/api/proxy
+* https://github.com/OpenZeppelin/ethernaut/blob/768071ef1d337a01d41261473687c095bd56f96f/contracts/contracts/helpers/UpgradeableProxy-08.sol
+* https://github.com/OpenZeppelin/openzeppelin-contracts/blob/1a60b061d5bb809c3d7e4ee915c77a00b1eca95d/contracts/proxy/Proxy.sol
+* https://github.com/OpenZeppelin/openzeppelin-contracts/blob/1a60b061d5bb809c3d7e4ee915c77a00b1eca95d/contracts/utils/Address.sol
