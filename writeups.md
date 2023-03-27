@@ -1708,3 +1708,19 @@ target.setMaxBalance(uint160(address(this)));
 * https://github.com/OpenZeppelin/ethernaut/blob/768071ef1d337a01d41261473687c095bd56f96f/contracts/contracts/helpers/UpgradeableProxy-08.sol
 * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/1a60b061d5bb809c3d7e4ee915c77a00b1eca95d/contracts/proxy/Proxy.sol
 * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/1a60b061d5bb809c3d7e4ee915c77a00b1eca95d/contracts/utils/Address.sol
+
+## 25 Motor Bike
+
+To beat this level, we need to comply with
+
+```solidity
+
+```
+
+### Solution
+
+???
+
+### References
+
+* ???
