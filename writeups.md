@@ -1709,7 +1709,7 @@ target.setMaxBalance(uint160(address(this)));
 * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/1a60b061d5bb809c3d7e4ee915c77a00b1eca95d/contracts/proxy/Proxy.sol
 * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/1a60b061d5bb809c3d7e4ee915c77a00b1eca95d/contracts/utils/Address.sol
 
-## 25 Motor
+## 25 Motor Bike
 
 To beat this level, we need to comply with
 
@@ -1796,3 +1796,19 @@ function testExploit() public {
 * https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable#initializers
 * https://github.com/OpenZeppelin/openzeppelin-upgrades/blob/d446a47a4f9c9bacefd0f9ac7d7fc8cfa0888ed5/packages/core/contracts/Initializable.sol#L42
  https://eips.ethereum.org/EIPS/eip-1967
+
+ ## 26 Double Entry Point
+
+To beat this level, we need to comply with
+
+```solidity
+
+```
+
+### Solution
+
+???
+
+### References
+
+* ???
