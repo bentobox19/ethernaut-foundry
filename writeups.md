@@ -1,5 +1,37 @@
 # Write Ups
 
+<!-- MarkdownTOC levels="1,2" autolink="true" -->
+
+- [00 Hello](#00-hello)
+- [01 Fallback](#01-fallback)
+- [01 Fallout](#01-fallout)
+- [03 CoinFlip](#03-coinflip)
+- [04 Telephone](#04-telephone)
+- [05 Token](#05-token)
+- [06 Delegation](#06-delegation)
+- [07 Force](#07-force)
+- [08 Vault](#08-vault)
+- [09 King](#09-king)
+- [10 Reenstrance](#10-reenstrance)
+- [11 Elevator](#11-elevator)
+- [12 Privacy](#12-privacy)
+- [13 Gatekeeper One](#13-gatekeeper-one)
+- [14 Gatekepper Two](#14-gatekepper-two)
+- [15 Naught Coin](#15-naught-coin)
+- [16 Preservation](#16-preservation)
+- [17 Recovery](#17-recovery)
+- [18 Magic Number](#18-magic-number)
+- [19 Alien Codex](#19-alien-codex)
+- [20 Denial](#20-denial)
+- [21 Shop](#21-shop)
+- [22 Dex](#22-dex)
+- [23 Dex Two](#23-dex-two)
+- [24 Puzzle Wallet](#24-puzzle-wallet)
+- [25 Motor Bike](#25-motor-bike)
+- [26 Double Entry Point](#26-double-entry-point)
+
+<!-- /MarkdownTOC -->
+
 ## 00 Hello
 
 ### Solution 1
@@ -1797,7 +1829,7 @@ function testExploit() public {
 * https://github.com/OpenZeppelin/openzeppelin-upgrades/blob/d446a47a4f9c9bacefd0f9ac7d7fc8cfa0888ed5/packages/core/contracts/Initializable.sol#L42
  https://eips.ethereum.org/EIPS/eip-1967
 
- ## 26 Double Entry Point
+## 26 Double Entry Point
 
 To beat this level, we need to comply with
 
