@@ -1851,7 +1851,7 @@ function transfer(address to, uint256 value) public override returns (bool) {
 }
 ```
 
-The *bug* here for the `CryptoVault` is that, while it can't prevent to engage in "sweeps" over the new delegated token, it can't prevent sweeps if a user gives the address of the old token.
+The **bug** here for the `CryptoVault` is that, while it _can_ prevent to engage in "sweeps" over the new delegated token, it _cannot_ prevent "sweeps" if a user gives the address of the old token.
 
 #### The Forta Bot
 
