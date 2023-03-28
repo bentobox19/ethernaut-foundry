@@ -1802,13 +1802,107 @@ function testExploit() public {
 To beat this level, we need to comply with
 
 ```solidity
+// setting a forta bot
+address usersDetectionBot = address(forta.usersDetectionBots(_player));
+if(usersDetectionBot == address(0)) return false;
 
+// making a "sweep" fail
+(bool ok, bytes memory data) = this.__trySweep(cryptoVault, instance);
+require(!ok, "Sweep succeded");
+
+// making a condition true (see 4 lines below)
+bool swept = abi.decode(data, (bool));
+return swept;
+
+// the condition to be true
+return(false, abi.encode(instance.balanceOf(instance.cryptoVault()) > 0));
 ```
+
+Lot to unpack:
+
+* Set a forta bot.
+* Make a "sweep" fail.
+* Make sure the balance of this particular token in the vault is greater than 0.
 
 ### Solution
 
-???
+#### The "Sweep"
+
+The contract `CryptoVault` allows anybody to sweep tokens to a recipient address, as long as it's not the declared underlying one.
+
+```solidity
+function sweepToken(IERC20 token) public {
+    require(token != underlying, "Can't transfer underlying token");
+    token.transfer(sweptTokensRecipient, token.balanceOf(address(this)));
+}
+```
+
+#### The Delegation
+
+The contract `LegacyToken` has some sort of update system that allows to `delegateToNewContract()`. Then, if this `delegate` variable is set, it will run a delegated transfer
+
+```solidity
+function transfer(address to, uint256 value) public override returns (bool) {
+    if (address(delegate) == address(0)) {
+        return super.transfer(to, value);
+    } else {
+        return delegate.delegateTransfer(to, value, msg.sender);
+    }
+}
+```
+
+The *bug* here for the `CryptoVault` is that, while it can't prevent to engage in "sweeps" over the new delegated token, it can't prevent sweeps if a user gives the address of the old token.
+
+#### The Forta Bot
+
+`DoubleEntryPoint` has a modifier that calls a detection bot to `notify()` on the call of the `delegateTransfer()` function, now this modifier, in case it sees an alert has been raised, will revert the execution.
+
+```solidity
+modifier fortaNotify() {
+  address detectionBot = address(forta.usersDetectionBots(player));
+
+  // Cache old number of bot alerts
+  uint256 previousValue = forta.botRaisedAlerts(detectionBot);
+
+  // Notify Forta
+  forta.notify(player, msg.data);
+
+  // Continue execution
+  _;
+
+  // Check if alarms have been raised
+  if(forta.botRaisedAlerts(detectionBot) > previousValue) revert("Alert has been triggered, reverting");
+}
+```
+
+### Putting a solution together
+
+This is the simplest part, as once we see how the pieces fit together, we don't need to guarantee other thing than this sweep fails. Then we build the following bot
+
+```solidity
+contract DetectionBot {
+  IForta forta;
+
+  constructor(address _fortaAddress) {
+    forta = IForta(_fortaAddress);
+  }
+
+  // this is the simplest solution:
+  // we just want _any_ transfer to fail in this level.
+  // if we were to add some logic, we need to examine the second parameter,
+  // to allow some transactions, while preventing others.
+  function handleTransaction(address user, bytes calldata) public {
+    forta.raiseAlert(user);
+  }
+}
+```
+
+A more complex bot examining `msg.data` would be needed if we need to guarantee the functioning of the transfer outside the `CryptoVault`.
 
 ### References
 
-* ???
+* https://docs.openzeppelin.com/contracts/4.x/api/token/erc20#IERC20-transfer-address-uint256-
+* https://eips.ethereum.org/EIPS/eip-20#transfer
+* https://docs.soliditylang.org/en/v0.8.19/contracts.html#modifier-overriding
+* https://github.com/OpenZeppelin/openzeppelin-contracts/blob/f8e3c375d19bd12f54222109dd0801c0e0b60dd2/contracts/token/ERC20/ERC20.sol#L113-L117
+* https://github.com/OpenZeppelin/openzeppelin-contracts/blob/f8e3c375d19bd12f54222109dd0801c0e0b60dd2/contracts/token/ERC20/ERC20.sol#L222-L240
