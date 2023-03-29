@@ -13,7 +13,6 @@ interface IFactory {
 
 interface IGatekeeperTwo {
   function enter(bytes8) external returns (bool);
-  function entrant() external returns (address);
 }
 
 contract Proxy {
