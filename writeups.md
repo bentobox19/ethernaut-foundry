@@ -2014,8 +2014,18 @@ instance.entrant() == _player
 
 ### Solution
 
-???
+* `gateOne`
+  * Just invoke `GateKeeperThree.construct0r()`
+
+* `gateTwo`
+  * Invoke `GateKeeperThree.createTrick()`
+  * Then `GatekeeperThree.getAllowance(block.timestamp)`
+
+* `gateThree`
+  * Send `0.001000000000000001 ether`
+  * Do not implement `receive()` so a transfer to you fails.
 
 ### References
 
-* ???
+* https://docs.soliditylang.org/en/v0.8.19/units-and-global-variables.html#block-and-transaction-properties
+ https://docs.soliditylang.org/en/v0.8.18/contracts.html#receive-ether-function

