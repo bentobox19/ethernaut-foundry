@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0;
 
 import "forge-std/Test.sol";
-import "../utils.sol";
 
 // for this challenge, player needs to be tx.origin
 // let's skip the middleman just once.
