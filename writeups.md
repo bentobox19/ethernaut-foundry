@@ -30,6 +30,7 @@
 - [25 Motor Bike](#25-motor-bike)
 - [26 Double Entry Point](#26-double-entry-point)
 - [27 Good Samaritan](#27-good-samaritan)
+- [28 Gatekeeper Three](#28-gatekeeper-three)
 
 <!-- /MarkdownTOC -->
 
@@ -2002,3 +2003,19 @@ function notify(uint256 amount) public pure {
 * https://docs.soliditylang.org/en/v0.8.19/abi-spec.html#errors
 * https://blog.soliditylang.org/2021/04/21/custom-errors/
 * https://solidity-by-example.org/error/
+
+## 28 Gatekeeper Three
+
+To beat this level, we need to comply with
+
+```solidity
+instance.entrant() == _player
+```
+
+### Solution
+
+???
+
+### References
+
+* ???
