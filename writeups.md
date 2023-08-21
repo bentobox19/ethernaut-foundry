@@ -57,7 +57,7 @@ function testExploit1() public {
 
 ### Solution 2
 
-Suppose we don't have the factory file at hand, but we can read the blockchain. We do that and call the function with the found value.
+Now, if we don't have the factory file at hand, which contains the password, we could read from the blockchain the `Hello` contract creation transaction and extract the string. Alternatively, we can just read the `Hello` contract storage at the slot 0, obtaining the value.
 
 To simplify things (we can always check the lowest bit), assume we know beforehand the string is at most 31 bytes long. Since  the first slot (`0`) is giving us the value `0x65746865726e6175743000000000000000000000000000000000000000000014`, we can conclude the string is length `10` bytes (`0x14` = `20` = `2 * 20 bytes`), and the string is `0x65746865726e61757430`. Take it to CyberChef to verify is `ethernaut0`:
 
