@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "forge-std/Test.sol";
-import "../utils.sol";
+import "../Utils.sol";
 
 // setting interfaces for DoubleEntryPoint and Forta
 // makes the code more readable than just issuing `.call{}()`

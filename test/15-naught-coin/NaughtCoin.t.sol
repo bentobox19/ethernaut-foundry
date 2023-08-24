@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "forge-std/Test.sol";
-import "../utils.sol";
+import "../Utils.sol";
 
 // there are no modifiers on the methods approve or transferFrom
 interface INaughtCoin {
