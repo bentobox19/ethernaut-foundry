@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "../Utils.sol";
 
 interface IAlienCodex {
-  function make_contact() external;
+  function makeContact() external;
   function retract() external;
   function revise(uint, bytes32) external;
 }
@@ -16,14 +16,14 @@ contract AlienCodexTest is Test {
   IAlienCodex internal challenge;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0x40055E69E7EB12620c8CCBCCAb1F187883301c30);
+    challengeAddress = utils.createLevelInstance(0xd8d8184a9F930F8B0F7AD48F14c7437c12fADF96);
     challenge = IAlienCodex(challengeAddress);
   }
 
   function testExploit() public {
     // all the other functions have a modifier
     // requiring you to invoke this one first
-    challenge.make_contact();
+    challenge.makeContact();
 
     // this function will underflow the length of the dynamic array at slot1 to 0xff...ff
     // meaning that now the EVM thinks that we have 2**256 - 1 elements there.
