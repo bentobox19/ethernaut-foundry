@@ -37,7 +37,7 @@ contract GoodSamaritanTest is Test {
   Attacker attacker;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0x8d07AC34D8f73e2892496c15223297e5B22B3ABE);
+    challengeAddress = utils.createLevelInstance(0x8586Fe7809208B08691A1D225ab2648De02de76B);
     attacker = new Attacker(challengeAddress);
   }
 
