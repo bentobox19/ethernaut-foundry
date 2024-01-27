@@ -18,14 +18,25 @@ forge install
 
 ## Run the entire test suit
 
+### Preparations
+
+Create and `.env` file. You can copy the sample `.env-sample`:
+
+```
+export RPC_URL=https://eth-goerli.g.alchemy.com/v2/9yUn7YrS814EkZ-2xI0Ex0VFHcPAUmRw
+export BLOCK_NUMBER=9500000
+```
+
+Then you just do
+
 ```bash
-forge test --fork-url https://eth-goerli.g.alchemy.com/v2/<API-KEY> --fork-block-number 9500000
+source .env && forge test --rpc-url $RPC_URL --fork-block-number $BLOCK_NUMBER
 ```
 
 ## Running a single challenge
 
 ```bash
-forge test --fork-url https://eth-goerli.g.alchemy.com/v2/<API-KEY> --fork-block-number 9500000 --match-contract Hello
+source .env && forge test --rpc-url $RPC_URL --fork-block-number $BLOCK_NUMBER --match-contract Hello
 ```
 
 ### Add traces
@@ -33,5 +44,5 @@ forge test --fork-url https://eth-goerli.g.alchemy.com/v2/<API-KEY> --fork-block
 There are different level of verbosities, `-vvvvv` is the maximum.
 
 ```bash
-forge test --fork-url https://eth-goerli.g.alchemy.com/v2/<API-KEY> --fork-block-number 9500000 --match-contract Hello -vvvvv
+source .env && forge test --rpc-url $RPC_URL --fork-block-number $BLOCK_NUMBER --match-contract Hello -vvvvv
 ```
