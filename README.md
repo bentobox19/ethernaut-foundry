@@ -23,8 +23,8 @@ forge install
 Create and `.env` file. You can copy the sample `.env-sample`:
 
 ```
-export RPC_URL=https://eth-goerli.g.alchemy.com/v2/9yUn7YrS814EkZ-2xI0Ex0VFHcPAUmRw
-export BLOCK_NUMBER=9500000
+export RPC_URL=https://eth-sepolia.g.alchemy.com/v2/9yUn7YrS814EkZ-2xI0Ex0VFHcPAUmRw
+export BLOCK_NUMBER=5200000
 ```
 
 Then you just do

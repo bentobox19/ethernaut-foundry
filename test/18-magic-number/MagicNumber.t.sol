@@ -13,7 +13,7 @@ contract MagicNumberTest is Test {
   IMagicNumber internal challenge;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0xFe18db6501719Ab506683656AAf2F80243F8D0c0);
+    challengeAddress = utils.createLevelInstance(0x2132C7bc11De7A90B87375f282d36100a29f97a9);
     challenge = IMagicNumber(challengeAddress);
   }
 

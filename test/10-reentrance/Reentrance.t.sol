@@ -43,7 +43,7 @@ contract ReentranceTest is Test {
   ReentranceAttack internal attackContract;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0x573eAaf1C1c2521e671534FAA525fAAf0894eCEb, 0.001 ether);
+    challengeAddress = utils.createLevelInstance(0x2a24869323C0B13Dff24E196Ba072dC790D52479, 0.001 ether);
     attackContract = new ReentranceAttack{value: 0.001 ether}(challengeAddress);
   }
 

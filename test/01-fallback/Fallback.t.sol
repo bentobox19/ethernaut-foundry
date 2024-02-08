@@ -14,7 +14,7 @@ contract FallbackTest is Test {
   IFallback internal challenge;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0x80934BE6B8B872B364b470Ca30EaAd8AEAC4f63F);
+    challengeAddress = utils.createLevelInstance(0x3c34A342b2aF5e885FcaA3800dB5B205fEfa3ffB);
     challenge = IFallback(challengeAddress);
   }
 

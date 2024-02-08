@@ -17,7 +17,7 @@ contract ForceTest is Test {
   address internal challengeAddress;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0x46f79002907a025599f355A04A512A6Fd45E671B);
+    challengeAddress = utils.createLevelInstance(0xb6c2Ec883DaAac76D8922519E63f875c2ec65575);
   }
 
   function testExploit() public {

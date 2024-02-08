@@ -42,7 +42,7 @@ contract CoinFlipTest is Test {
   CoinFlipAttack internal attackContract;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0x9240670dbd6476e6a32055E52A0b0756abd26fd2);
+    challengeAddress = utils.createLevelInstance(0xA62fE5344FE62AdC1F356447B669E9E6D10abaaF);
     attackContract = new CoinFlipAttack(challengeAddress);
   }
 

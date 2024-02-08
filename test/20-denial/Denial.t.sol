@@ -52,7 +52,7 @@ contract DenialTest is Test {
   DenialAttack internal attackContract;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0xD0a78dB26AA59694f5Cb536B50ef2fa00155C488, 0.001 ether);
+    challengeAddress = utils.createLevelInstance(0x2427aF06f748A6adb651aCaB0cA8FbC7EaF802e6, 0.001 ether);
     attackContract = new DenialAttack(challengeAddress);
   }
 

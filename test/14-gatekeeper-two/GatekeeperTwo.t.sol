@@ -28,7 +28,7 @@ contract GatekeeperTwoTest is Test {
   address internal challengeAddress;
 
   function setUp() public {
-    challengeFactory = IFactory(0xf59112032D54862E199626F55cFad4F8a3b0Fce9);
+    challengeFactory = IFactory(0x0C791D1923c738AC8c4ACFD0A60382eE5FF08a23);
     challengeAddress = challengeFactory.createInstance(tx.origin);
   }
 

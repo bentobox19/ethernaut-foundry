@@ -28,7 +28,7 @@ contract KingTest is Test {
   KingAttacker internal attackerContract;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0x725595BA16E76ED1F6cC1e1b65A88365cC494824, 0.001 ether);
+    challengeAddress = utils.createLevelInstance(0x3049C00639E6dfC269ED1451764a046f7aE500c6, 0.001 ether);
     attackerContract = new KingAttacker{value: 0.001 ether}(challengeAddress);
   }
 

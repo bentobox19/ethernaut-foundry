@@ -16,7 +16,7 @@ contract AlienCodexTest is Test {
   IAlienCodex internal challenge;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0xd8d8184a9F930F8B0F7AD48F14c7437c12fADF96);
+    challengeAddress = utils.createLevelInstance(0x0BC04aa6aaC163A6B3667636D798FA053D43BD11);
     challenge = IAlienCodex(challengeAddress);
   }
 

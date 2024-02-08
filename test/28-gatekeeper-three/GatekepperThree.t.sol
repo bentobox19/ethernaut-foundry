@@ -21,7 +21,7 @@ contract GatekeeperThreeTest is Test {
   address internal challengeAddress;
 
   function setUp() public {
-    challengeFactory = IFactory(0x762db91C67F7394606C8A636B5A55dbA411347c6);
+    challengeFactory = IFactory(0x5B50F1F5fE2Bef0a0429fD27B8214d856066F45e);
     challengeAddress = challengeFactory.createInstance(tx.origin);
   }
 

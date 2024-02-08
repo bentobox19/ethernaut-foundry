@@ -35,7 +35,7 @@ contract DoubleEntryPointTest is Test {
   address internal challengeAddress;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0x9451961b7Aea1Df57bc20CC68D72f662241b5493);
+    challengeAddress = utils.createLevelInstance(0x34bD06F195756635a10A7018568E033bC15F3FB5);
   }
 
   function testExploit() public {

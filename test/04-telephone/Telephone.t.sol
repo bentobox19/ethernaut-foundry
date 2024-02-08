@@ -25,7 +25,7 @@ contract TelephoneTest is Test {
   TelephoneAttack internal attackContract;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0x1ca9f1c518ec5681C2B7F97c7385C0164c3A22Fe);
+    challengeAddress = utils.createLevelInstance(0x2C2307bb8824a0AbBf2CC7D76d8e63374D2f8446);
     attackContract = new TelephoneAttack(challengeAddress);
   }
 

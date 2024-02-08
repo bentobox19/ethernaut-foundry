@@ -13,7 +13,7 @@ contract TokenTest is Test {
   IToken internal challenge;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0xB4802b28895ec64406e45dB504149bfE79A38A57);
+    challengeAddress = utils.createLevelInstance(0x478f3476358Eb166Cb7adE4666d04fbdDB56C407);
     challenge = IToken(challengeAddress);
   }
 

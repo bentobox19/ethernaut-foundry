@@ -8,7 +8,7 @@ contract VaultTest is Test {
   address internal challengeAddress;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0x3A78EE8462BD2e31133de2B8f1f9CBD973D6eDd6);
+    challengeAddress = utils.createLevelInstance(0xB7257D8Ba61BD1b3Fb7249DCd9330a023a5F3670);
   }
 
   function testExploit() public {

@@ -13,7 +13,7 @@ contract FalloutTest is Test {
   IFallout internal challenge;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0x0AA237C34532ED79676BCEa22111eA2D01c3d3e7);
+    challengeAddress = utils.createLevelInstance(0x676e57FdBbd8e5fE1A7A3f4Bb1296dAC880aa639);
     challenge = IFallout(challengeAddress);
   }
 
