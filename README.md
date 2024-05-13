@@ -20,7 +20,7 @@ forge install
 
 ### Preparations
 
-Create and `.env` file. You can copy the sample `.env-sample`:
+Create an `.env` file. You can copy the sample `.env-sample`:
 
 ```
 export RPC_URL=https://eth-sepolia.g.alchemy.com/v2/9yUn7YrS814EkZ-2xI0Ex0VFHcPAUmRw
