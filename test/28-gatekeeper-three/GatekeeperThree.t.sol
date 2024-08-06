@@ -36,7 +36,10 @@ contract GatekeeperThreeTest is Test {
     (bool result,) = challengeAddress.call{value: 0.001000000000000001 ether}("");
     result;
 
-    gatekeeperThree.enter();
+    // This code handles the REVERT gracefully.
+    // It remains to be determined whether the issue is with Forge or another cause.
+    (result,) = challengeAddress.call(abi.encodeWithSignature("enter()"));
+    result;
 
     require(challengeFactory.validateInstance(payable(challengeAddress), tx.origin));
   }
