@@ -12,7 +12,7 @@ interface IEthernaut {
 
 library utils {
   Vm public constant vm = Vm(address(bytes20(uint160(uint256(keccak256('hevm cheat code'))))));
-  IEthernaut internal constant ethernaut = IEthernaut(0xa3e7317E591D5A0F1c605be1b3aC4D2ae56104d6);
+  IEthernaut internal constant ethernaut = IEthernaut(0xB877915d8Ba049e7cAFc1525F85CEc322A362767);
 
   function createLevelInstance(address _levelFactory) external returns (address) {
     return _createLevelInstance(_levelFactory, 0);

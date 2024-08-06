@@ -8,7 +8,7 @@ contract RecoveryTest is Test {
   address internal challengeAddress;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0xAF98ab8F2e2B24F42C661ed023237f5B7acAB048, 0.001 ether);
+    challengeAddress = utils.createLevelInstance(0xB0117353e1c5B0E4A7CC2F6590077c6073Fc0a4c, 0.001 ether);
   }
 
   function testExploit() public {

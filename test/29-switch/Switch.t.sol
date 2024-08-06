@@ -8,7 +8,7 @@ contract SwitchTest is Test {
   address internal challengeAddress;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0xb2aBa0e156C905a9FAEc24805a009d99193E3E53);
+    challengeAddress = utils.createLevelInstance(0x1bFb120Ac1361ece092FC64BD8ECdb3244463071);
   }
 
   function testExploit() public {

@@ -8,7 +8,7 @@ contract DelegationTest is Test {
   address internal challengeAddress;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0x73379d8B82Fda494ee59555f333DF7D44483fD58);
+    challengeAddress = utils.createLevelInstance(0xF695A9661A3b909ffb15F97556bAb286b19520E7);
   }
 
   function testExploit() public {

@@ -30,7 +30,7 @@ contract DexTwoTest is Test {
   MyToken myToken;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0xf59112032D54862E199626F55cFad4F8a3b0Fce9);
+    challengeAddress = utils.createLevelInstance(0x0F507c0047C4699bfD7890bb3CBcb2353de7F60B);
     dex = IDexTwo(challengeAddress);
     myToken = new MyToken();
   }

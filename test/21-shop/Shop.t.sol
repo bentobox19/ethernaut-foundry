@@ -33,7 +33,7 @@ contract ShopTest is Test {
   ShopAttack internal attackContract;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0x691eeA9286124c043B82997201E805646b76351a);
+    challengeAddress = utils.createLevelInstance(0xA1f4831cBcB0A2C321c4656EE85fD87b2de12035);
     attackContract = new ShopAttack(challengeAddress);
   }
 

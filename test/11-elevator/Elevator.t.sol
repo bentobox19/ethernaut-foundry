@@ -40,7 +40,7 @@ contract ElevatorTest is Test {
   Building internal building;
 
   function setUp() public {
-    challengeAddress = utils.createLevelInstance(0x6DcE47e94Fa22F8E2d8A7FDf538602B1F86aBFd2);
+    challengeAddress = utils.createLevelInstance(0xEf996437EB2DC6C7a721B1743daEdfCB311AE2b6);
     building = new Building(challengeAddress);
   }
 
