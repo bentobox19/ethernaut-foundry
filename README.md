@@ -23,20 +23,20 @@ forge install
 Create an `.env` file. You can copy the sample `.env-sample`:
 
 ```
-export RPC_URL=https://eth-sepolia.g.alchemy.com/v2/9yUn7YrS814EkZ-2xI0Ex0VFHcPAUmRw
-export BLOCK_NUMBER=5200000
+export RPC_URL=https://eth-holesky.g.alchemy.com/v2/9yUn7YrS814EkZ-2xI0Ex0VFHcPAUmRw
+export BLOCK_NUMBER=2000000
 ```
 
 Then you just do
 
 ```bash
-source .env && forge test --rpc-url $RPC_URL --fork-block-number $BLOCK_NUMBER
+forge test
 ```
 
 ## Running a single challenge
 
 ```bash
-source .env && forge test --rpc-url $RPC_URL --fork-block-number $BLOCK_NUMBER --match-contract Hello
+forge test --match-contract Hello
 ```
 
 ### Add traces
@@ -44,5 +44,5 @@ source .env && forge test --rpc-url $RPC_URL --fork-block-number $BLOCK_NUMBER -
 There are different level of verbosities, `-vvvvv` is the maximum.
 
 ```bash
-source .env && forge test --rpc-url $RPC_URL --fork-block-number $BLOCK_NUMBER --match-contract Hello -vvvvv
+forge test --match-contract Hello -vvvvv
 ```

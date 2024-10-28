@@ -23,6 +23,8 @@ library utils {
   }
 
   function _createLevelInstance(address _levelFactory, uint256 _value) private returns (address) {
+    vm.createSelectFork((vm.envString("RPC_URL")), 2000000);
+
     ILevel level = ILevel(_levelFactory);
 
     vm.recordLogs();
