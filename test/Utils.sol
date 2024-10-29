@@ -23,7 +23,7 @@ library utils {
   }
 
   function _createLevelInstance(address _levelFactory, uint256 _value) private returns (address) {
-    vm.createSelectFork((vm.envString("RPC_URL")), 2000000);
+    vm.createSelectFork(vm.envString("RPC_URL"), vm.parseUint(vm.envString("BLOCK_NUMBER")));
 
     ILevel level = ILevel(_levelFactory);
 
