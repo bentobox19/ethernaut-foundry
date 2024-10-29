@@ -28,6 +28,8 @@ contract GatekeeperTwoTest is Test {
   address internal challengeAddress;
 
   function setUp() public {
+    // As we are not using the utils library, we need to fork here.
+    vm.createSelectFork(vm.envString("RPC_URL"), vm.parseUint(vm.envString("BLOCK_NUMBER")));
     challengeFactory = IFactory(0xC0aB043d0585e15a9357304125CB674CF7623B6c);
     challengeAddress = challengeFactory.createInstance(tx.origin);
   }
