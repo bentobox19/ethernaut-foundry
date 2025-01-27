@@ -33,6 +33,7 @@
 - [28 Gatekeeper Three](#28-gatekeeper-three)
 - [29 Switch](#29-switch)
 - [30 Higher Order](#30-higher-order)
+- [31 Stake](#31-stake)
 
 <!-- /MarkdownTOC -->
 
@@ -2189,3 +2190,33 @@ function testExploit() public {
 
 * [Solidity Documentation - Yul](https://docs.soliditylang.org/en/v0.8.28/yul.html)
   * Focus on the `calldataload(p)` operation.
+
+## 31 Stake
+
+To beat this level, we need to comply with
+
+```solidity
+stakeAddress.balance != 0 &&
+stake.totalStaked() > stakeAddress.balance &&
+stake.UserStake(_player) == 0 &&
+stake.Stakers(_player);
+```
+
+In words:
+
+- The Stake contract's ETH balance has to be greater than 0.
+- `totalStaked` must be greater than the Stake contract's ETH balance.
+- You must be a staker.
+- Your staked balance must be 0.
+
+### Solution
+
+???
+
+### Implementation
+
+???
+
+### References
+
+???
