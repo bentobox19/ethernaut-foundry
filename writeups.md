@@ -35,6 +35,7 @@
 - [30 Higher Order](#30-higher-order)
 - [31 Stake](#31-stake)
 - [32 Impersonator](#32-impersonator)
+- [33 Magical Animal Carousel](#33-magical-animal-carousel)
 
 <!-- /MarkdownTOC -->
 
@@ -2278,11 +2279,6 @@ contract AttackAssistant {
 * https://docs.openzeppelin.com/contracts/4.x/erc20
 * https://docs.soliditylang.org/en/v0.8.18/contracts.html#receive-ether-function
 
-
-
-
-
-
 ## 32 Impersonator
 
 To beat this level, we need to comply with
@@ -2330,3 +2326,19 @@ function testExploit() public {
 * https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2.md
   * All transaction signatures whose s-value is greater than `secp256k1n/2` are now considered invalid.
   * Allowing transactions with any s value with `0 < s < secp256k1n`, as is currently the case, opens a transaction malleability concern, as one can take any transaction, flip the s value from `s` to `secp256k1n - s`, flip the v value (`27 -> 28`, `28 -> 27`), and the resulting signature would still be valid.
+
+## 33 Magical Animal Carousel
+
+To beat this level, we need to comply with
+
+```solidity
+
+```
+
+### Solution
+
+(TODO)
+
+### References
+
+(TODO)
